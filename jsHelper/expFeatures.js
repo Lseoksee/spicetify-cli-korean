@@ -89,9 +89,9 @@ button.reset:hover {
     content.appendChild(style);
     content.innerHTML += `<p class="placeholder">Experimental features not found/is initializing. Try re-opening this modal.</p>`;
 
-    new Spicetify.Menu.Item("Experimental features", false, () => {
+    new Spicetify.Menu.Item("실험실 기능", false, () => {
         Spicetify.PopupModal.display({
-            title: "Experimental features",
+            title: "실험실 기능",
             content,
         }),
             (() => {
