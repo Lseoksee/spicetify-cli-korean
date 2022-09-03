@@ -92,11 +92,11 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
             menu: react.createElement(
                 Spicetify.ReactComponent.Menu,
                 {},
-                react.createElement("h3", null, " Adjustments"),
+                react.createElement("h3", null, " 조정"),
                 react.createElement(OptionList, {
                     items: [
                         {
-                            desc: "Font size",
+                            desc: "폰트 크기",
                             key: "font-size",
                             type: ConfigAdjust,
                             min: fontSizeLimit.min,
@@ -104,7 +104,7 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
                             step: fontSizeLimit.step,
                         },
                         {
-                            desc: "Delay",
+                            desc: "가사싱크",
                             key: "delay",
                             type: ConfigAdjust,
                             min: -10000,
@@ -113,13 +113,13 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
                             when: () => mode === SYNCED || mode === KARAOKE,
                         },
                         {
-                            desc: "Compact",
+                            desc: "단순하게 보기",
                             key: "synced-compact",
                             type: ConfigSlider,
                             when: () => mode === SYNCED || mode === KARAOKE,
                         },
                         {
-                            desc: "Dual panel",
+                            desc: "두 개씩 보기",
                             key: "dual-genius",
                             type: ConfigSlider,
                             when: () => mode === GENIUS,

@@ -200,8 +200,8 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, copyright, isKara 
                         },
                         onAuxClick: async (event) => {
                             await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
-                                .then(() => Spicetify.showNotification("Lyrics copied to clipboard"))
-                                .catch(() => Spicetify.showNotification("Failed to copy lyrics to clipboard"));
+                                .then(() => Spicetify.showNotification("가사를 복사했습니다"))
+                                .catch(() => Spicetify.showNotification("가사 복사 오류"));
                         },
                     },
                     !isKara ? text : react.createElement(KaraokeLine, { text, startTime, position, isActive })
@@ -454,8 +454,8 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics, provider, copyright, isKa
                     },
                     onAuxClick: async (event) => {
                         await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
-                            .then(() => Spicetify.showNotification("Lyrics copied to clipboard"))
-                            .catch(() => Spicetify.showNotification("Failed to copy lyrics to clipboard"));
+                            .then(() => Spicetify.showNotification("가사를 복사했습니다"))
+                            .catch(() => Spicetify.showNotification("가사 복사 오류"));
                     },
                 },
                 !isKara ? text : react.createElement(KaraokeLine, { text, startTime, position, isActive })
@@ -491,8 +491,8 @@ const UnsyncedLyricsPage = react.memo(({ lyrics, provider, copyright }) => {
                     dir: "auto",
                     onAuxClick: async (event) => {
                         await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
-                            .then(() => Spicetify.showNotification("Lyrics copied to clipboard"))
-                            .catch(() => Spicetify.showNotification("Failed to copy lyrics to clipboard"));
+                            .then(() => Spicetify.showNotification("가사를 복사했습니다"))
+                            .catch(() => Spicetify.showNotification("가사 복사 오류"));
                     },
                 },
                 text
