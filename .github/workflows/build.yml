@@ -65,25 +65,25 @@ jobs:
         if: env.IS_UNIX == 'true'
         uses: edgarrc/action-7z@v1
         with:
-          args: 7z a -bb0 "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar" "./spicetify" "./CustomApps" "./Extensions" "./Themes" "./jsHelper" "globals.d.ts" "css-map.json"
+          args: 7z a -bb0 "spicetify-korean-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar" "./spicetify" "./CustomApps" "./Extensions" "./Themes" "./jsHelper" "globals.d.ts" "css-map.json"
 
       - name: 7z - .tar.gz
         if: env.IS_UNIX == 'true'
         uses: edgarrc/action-7z@v1
         with:
-          args: 7z a -bb0 -sdel -mx9 "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz" "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar"
+          args: 7z a -bb0 -sdel -mx9 "spicetify-korean-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz" "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch }}.tar"
 
       - name: 7z - .zip
         if: env.IS_WIN == 'true'
         uses: edgarrc/action-7z@v1
         with:
-          args: 7z a -bb0 -mx9 "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch == 'amd64' && 'x64' || 'x32' }}.zip" "./spicetify.exe" "./CustomApps" "./Extensions" "./Themes" "./jsHelper" "globals.d.ts" "css-map.json"
+          args: 7z a -bb0 -mx9 "spicetify-korean-${{ env.TAG }}-${{ matrix.os }}-${{ matrix.arch == 'amd64' && 'x64' || 'x32' }}.zip" "./spicetify.exe" "./CustomApps" "./Extensions" "./Themes" "./jsHelper" "globals.d.ts" "css-map.json" "빠른설치.bat"
 
       - name: Release
         if: env.IS_UNIX == 'true' || env.IS_WIN == 'true'
         uses: softprops/action-gh-release@v1
         with:
-          files: "spicetify-${{ env.TAG }}-${{ matrix.os }}-${{ (matrix.os == 'windows' && matrix.arch == 'amd64' && 'x64') || (matrix.os == 'windows' && matrix.arch == '386' && 'x32') || matrix.arch }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}"
+          files: "spicetify-korean-${{ env.TAG }}-${{ matrix.os }}-${{ (matrix.os == 'windows' && matrix.arch == 'amd64' && 'x64') || (matrix.os == 'windows' && matrix.arch == '386' && 'x32') || matrix.arch }}.${{ matrix.os == 'windows' && 'zip' || 'tar.gz' }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
