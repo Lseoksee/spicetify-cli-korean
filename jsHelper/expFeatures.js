@@ -77,6 +77,7 @@ button.reset {
     background-color: var(--spice-text);
     color: var(--spice-main);
     border-radius: 500px;
+    white-space: nowrap;
     font-size: inherit;
     padding-block: 12px;
     padding-inline: 32px;
@@ -87,9 +88,9 @@ button.reset:hover {
     content.appendChild(style);
     content.innerHTML += `<p class="placeholder">Experimental features not found/is initializing. Try re-opening this modal.</p>`;
 
-    new Spicetify.Menu.Item("Experimental features", false, () => {
+    new Spicetify.Menu.Item("실험실 기능", false, () => {
         Spicetify.PopupModal.display({
-            title: "Experimental features",
+            title: "실험실 기능",
             content,
             isLarge: true,
         }),
@@ -187,9 +188,9 @@ button.reset:hover {
         const settingRow = document.createElement("div");
         settingRow.classList.add("setting-row");
         settingRow.innerHTML += `
-                    <label class="col description">Clear all cached features and preferences</label>
+                    <label class="col description">모든 설정 기본값으로 되돌리기</label>
                     <div class="col action">
-                        <button class="reset">Reset</button>
+                        <button class="reset">초기화</button>
                     </div>`;
         const resetButton = settingRow.querySelector("button.reset");
         resetButton.onclick = () => {

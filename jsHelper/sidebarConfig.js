@@ -110,9 +110,9 @@
     const container = document.createElement("div");
     container.id = "spicetify-sidebar-config";
     const up = document.createElement("button");
-    up.innerText = "Up";
+    up.innerText = "위로";
     const down = document.createElement("button");
-    down.innerText = "Down";
+    down.innerText = "아래로";
     const hide = document.createElement("button");
     const stick = document.createElement("button");
     const style = document.createElement("style");
@@ -181,8 +181,8 @@
                     down.onclick = () => onSwap(item, 1);
                 }
 
-                stick.innerText = status === STICKY ? "Unstick" : "Stick";
-                hide.innerText = status === HIDDEN ? "Unhide" : "Hide";
+                stick.innerText = status === STICKY ? "고정해제" : "상단에 고정";
+                hide.innerText = status === HIDDEN ? "표시하기" : "숨기기";
                 hide.onclick = () => onChangeStatus(item, HIDDEN);
                 stick.onclick = () => onChangeStatus(item, STICKY);
 
@@ -198,7 +198,7 @@
         writeStorage();
     }
 
-    new Spicetify.Menu.Item("Sidebar config", false, (self) => {
+    new Spicetify.Menu.Item("사이드바 수정하기", false, (self) => {
         self.isEnabled = !self.isEnabled;
         if (self.isEnabled) {
             injectInteraction();
