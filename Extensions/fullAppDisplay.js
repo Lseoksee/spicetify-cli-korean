@@ -794,7 +794,7 @@ button.switch[disabled] {
             null,
             style,
             react.createElement(ConfigItem, {
-                name: checkLyricsPlus() ? "Enable Lyrics Plus integration" : "Unable to find Lyrics Plus",
+                name: checkLyricsPlus() ? "Lyrics Plus 가사표시" : "Lyrics Plus 확장필요",
                 field: "lyricsPlus",
                 func: () => {
                     updateVisual();
@@ -802,15 +802,15 @@ button.switch[disabled] {
                 },
                 disabled: !checkLyricsPlus(),
             }),
-            react.createElement(ConfigItem, { name: "Enable progress bar", field: "enableProgress", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Enable controls", field: "enableControl", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Trim title", field: "trimTitle", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Show album", field: "showAlbum", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Show all artists", field: "showAllArtists", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Show icons", field: "icons", func: updateVisual }),
-            react.createElement(ConfigItem, { name: "Vertical mode", field: "vertical", func: updateStyle }),
-            react.createElement(ConfigItem, { name: "Enable fullscreen", field: "enableFullscreen", func: toggleFullscreen }),
-            react.createElement(ConfigItem, { name: "Enable song change animation", field: "enableFade", func: updateVisual })
+            react.createElement(ConfigItem, { name: "재생바 표시", field: "enableProgress", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "재생 컨트롤러 표시", field: "enableControl", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "제목 간추리기", field: "trimTitle", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "앨범 제목 표시", field: "showAlbum", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "모든 아티스트 표시", field: "showAllArtists", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "아티스트 아이콘 표시", field: "icons", func: updateVisual }),
+            react.createElement(ConfigItem, { name: "수직 모드", field: "vertical", func: updateStyle }),
+            react.createElement(ConfigItem, { name: "완전한 전체화면", field: "enableFullscreen", func: toggleFullscreen }),
+            react.createElement(ConfigItem, { name: "부드러운 곡전환", field: "enableFade", func: updateVisual })
         );
         Spicetify.PopupModal.display({
             title: "Full App Display",
