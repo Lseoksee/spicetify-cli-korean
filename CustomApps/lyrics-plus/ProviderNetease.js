@@ -142,7 +142,7 @@ const ProviderNetease = (function () {
             return null;
         }
         if (isInstrumental) {
-            return [{ startTime: "0000", text: "♪ Instrumental ♪" }];
+            return [{ startTime: "0000", text: "♪ 전주곡 ♪" }];
         }
         return lyrics;
     }
@@ -172,7 +172,7 @@ const ProviderNetease = (function () {
         }
 
         if (isInstrumental) {
-            return [{ text: "♪ Instrumental ♪" }];
+            return [{ text: "♪ 전주곡 ♪" }];
         }
 
         return lyrics;

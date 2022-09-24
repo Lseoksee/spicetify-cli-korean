@@ -55,28 +55,28 @@ const CONFIG = {
     providers: {
         netease: {
             on: getConfig("lyrics-plus:provider:netease:on"),
-            desc: `Crowdsourced lyrics provider ran by Chinese developers and users.`,
+            desc: `중국에서 운영하는 실시간 가사 서비스입니다. (정확도 떨어짐)`,
             modes: [KARAOKE, SYNCED, UNSYNCED],
         },
         musixmatch: {
             on: getConfig("lyrics-plus:provider:musixmatch:on"),
-            desc: `Fully compatible with Spotify. Requires a token that can be retrieved from the official Musixmatch app. Follow instructions on <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">Spicetify Docs</a>.`,
+            desc: `Spotify와 완벽하게 호환이 됩니다. 공식 Musixmatch 앱에서 검색할 수 있는 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">토큰이 필요합니다</a>.`,
             token: localStorage.getItem("lyrics-plus:provider:musixmatch:token") || "21051986b9886beabe1ce01c3ce94c96319411f8f2c122676365e3",
             modes: [SYNCED, UNSYNCED],
         },
         spotify: {
             on: getConfig("lyrics-plus:provider:spotify:on"),
-            desc: `Lyrics sourced from official Spotify API.`,
+            desc: `Spotify에서 공식으로 지원되는 가사입니다.`,
             modes: [SYNCED, UNSYNCED],
         },
         genius: {
             on: getConfig("lyrics-plus:provider:genius:on"),
-            desc: `Provide unsynced lyrics with insights from artists themselves.`,
+            desc: `가장 완벽한 일반가사를 지원합니다.`,
             modes: [GENIUS],
         },
     },
     providersOrder: localStorage.getItem("lyrics-plus:services-order"),
-    modes: ["karaoke", "synced", "unsynced", "genius"],
+    modes: ["노래방", "실시간가사", "가사", "genius"],
     locked: localStorage.getItem("lyrics-plus:lock-mode") || "-1",
 };
 
@@ -337,7 +337,7 @@ class LyricsContainer extends react.Component {
 
         this.viewPort = document.querySelector(".Root__main-view .os-viewport");
 
-        this.configButton = new Spicetify.Menu.Item("Lyrics Plus config", false, openConfig);
+        this.configButton = new Spicetify.Menu.Item("가사 설정", false, openConfig);
         this.configButton.register();
 
         this.onFontSizeChange = (event) => {
