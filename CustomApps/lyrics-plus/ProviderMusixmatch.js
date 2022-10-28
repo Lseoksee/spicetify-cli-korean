@@ -39,7 +39,7 @@ const ProviderMusixmatch = (function () {
 			};
 		} else if (body["track.lyrics.get"]?.message?.body?.lyrics?.restricted) {
 			return {
-				error: "Unfortunately we're not authorized to show these lyrics.",
+				error: "이 가사를 표시할 권한이 없습니다.",
 				uri: info.uri
 			};
 		}
@@ -58,7 +58,7 @@ const ProviderMusixmatch = (function () {
 		const isInstrumental = meta?.track?.instrumental;
 
 		if (isInstrumental) {
-			return [{ text: "♪ Instrumental ♪", startTime: "0000" }];
+			return [{ text: "♪ 전주곡 ♪", startTime: "0000" }];
 		} else if (hasSynced) {
 			const subtitle = body["track.subtitles.get"]?.message?.body.subtitle_list?.[0]?.subtitle;
 			if (!subtitle) {
@@ -85,7 +85,7 @@ const ProviderMusixmatch = (function () {
 		const isInstrumental = meta?.track?.instrumental;
 
 		if (isInstrumental) {
-			return [{ text: "♪ Instrumental ♪" }];
+			return [{ text: "♪ 전주곡 ♪" }];
 		} else if (hasUnSynced) {
 			const lyrics = body["track.lyrics.get"]?.message?.body?.lyrics?.lyrics_body;
 			if (!lyrics) {

@@ -398,12 +398,12 @@ function openConfig() {
 		{
 			id: `${APP_NAME}-config-container`
 		},
-		react.createElement("h2", null, "Options"),
+		react.createElement("h2", null, "설정"),
 		react.createElement(OptionList, {
 			items: [
 				{
-					desc: "Font size",
-					info: "(or Ctrl + Mouse scroll in main app)",
+					desc: "폰트크기",
+					info: "(Ctrl + 마우스휠로 조정가능)",
 					key: "font-size",
 					type: ConfigAdjust,
 					min: fontSizeLimit.min,
@@ -411,67 +411,67 @@ function openConfig() {
 					step: fontSizeLimit.step
 				},
 				{
-					desc: "Alignment",
+					desc: "정렬",
 					key: "alignment",
 					type: ConfigSelection,
 					options: {
-						left: "Left",
-						center: "Center",
-						right: "Right"
+						left: "왼쪽",
+						center: "중앙",
+						right: "오른쪽"
 					}
 				},
 				{
-					desc: "Fullscreen hotkey",
+					desc: "전체화면 키",
 					key: "fullscreen-key",
 					type: ConfigHotkey
 				},
 				{
-					desc: "Compact synced: Lines to show before",
+					desc: "표시개수: 현재 라인 이전",
 					key: "lines-before",
 					type: ConfigSelection,
 					options: [0, 1, 2, 3, 4]
 				},
 				{
-					desc: "Compact synced: Lines to show after",
+					desc: "표시개수: 현재 라인 이후",
 					key: "lines-after",
 					type: ConfigSelection,
 					options: [0, 1, 2, 3, 4]
 				},
 				{
-					desc: "Compact synced: Fade-out blur",
+					desc: "블러 효과",
 					key: "fade-blur",
 					type: ConfigSlider
 				},
 				{
-					desc: "Noise overlay",
+					desc: "노이즈 오버레이",
 					key: "noise",
 					type: ConfigSlider
 				},
 				{
-					desc: "Colorful background",
+					desc: "배경 색 자동전환",
 					key: "colorful",
 					type: ConfigSlider
 				},
 				{
-					desc: "Background color",
+					desc: "배경 색상",
 					key: "background-color",
 					type: ConfigInput,
 					when: () => !CONFIG.visual["colorful"]
 				},
 				{
-					desc: "Active text color",
+					desc: "활성 상태 색상",
 					key: "active-color",
 					type: ConfigInput,
 					when: () => !CONFIG.visual["colorful"]
 				},
 				{
-					desc: "Inactive text color",
+					desc: "비활성 상태 색상",
 					key: "inactive-color",
 					type: ConfigInput,
 					when: () => !CONFIG.visual["colorful"]
 				},
 				{
-					desc: "Highlight text background",
+					desc: "텍스트 배경 강조 색상",
 					key: "highlight-color",
 					type: ConfigInput,
 					when: () => !CONFIG.visual["colorful"]
@@ -484,7 +484,7 @@ function openConfig() {
 				lyricContainerUpdate && lyricContainerUpdate();
 			}
 		}),
-		react.createElement("h2", null, "Providers"),
+		react.createElement("h2", null, "가사제공"),
 		react.createElement(ServiceList, {
 			itemsList: CONFIG.providersOrder,
 			onListChange: list => {
@@ -504,7 +504,7 @@ function openConfig() {
 	);
 
 	Spicetify.PopupModal.display({
-		title: "Lyrics Plus",
+		title: "가사+",
 		content: configContainer,
 		isLarge: true
 	});
