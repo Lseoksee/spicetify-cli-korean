@@ -176,7 +176,7 @@ function openConfig() {
 		react.createElement(OptionList, {
 			items: [
 				{
-					desc: "Time range",
+					desc: "기간설정",
 					key: "range",
 					defaultValue: CONFIG["range"],
 					type: ConfigSelection,
@@ -189,42 +189,42 @@ function openConfig() {
 					when: () => true
 				},
 				{
-					desc: "Date locale",
+					desc: "표기언어",
 					key: "locale",
 					defaultValue: CONFIG.locale,
 					type: ConfigInput,
 					when: () => true
 				},
 				{
-					desc: "Relative date",
+					desc: "상대적시간",
 					key: "relative",
 					defaultValue: CONFIG.relative,
 					type: ConfigSlider,
 					when: () => true
 				},
 				{
-					desc: "Show type",
+					desc: "유형",
 					key: "visual:type",
 					defaultValue: CONFIG.visual.type,
 					type: ConfigSlider,
 					when: () => true
 				},
 				{
-					desc: "Show track count",
+					desc: "곡 개수",
 					key: "visual:count",
 					defaultValue: CONFIG.visual.count,
 					type: ConfigSlider,
 					when: () => true
 				},
 				{
-					desc: "Fetch new podcast",
+					desc: "새 팟캐스트",
 					key: "podcast",
 					defaultValue: CONFIG["podcast"],
 					type: ConfigSlider,
 					when: () => true
 				},
 				{
-					desc: "Fetch new music",
+					desc: "새 음악",
 					key: "music",
 					defaultValue: CONFIG["music"],
 					type: ConfigSlider,

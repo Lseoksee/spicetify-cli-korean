@@ -176,7 +176,7 @@ class Grid extends react.Component {
 	async componentDidMount() {
 		gridUpdatePostsVisual = this.updatePostsVisual.bind(this);
 
-		this.configButton = new Spicetify.Menu.Item("New Releases config", false, openConfig);
+		this.configButton = new Spicetify.Menu.Item("최신음악 설정", false, openConfig);
 		this.configButton.register();
 
 		const viewPort = document.querySelector(this.viewportSelector);
@@ -297,14 +297,14 @@ var count = (function () {
 
 async function fetchTracks() {
 	let artistList = await getArtistList();
-	Spicetify.showNotification(`Fetching releases from ${artistList.length} artists`);
+	Spicetify.showNotification(`${artistList.length}명의 아티스트 목록을 불러옴`);
 
 	const requests = artistList.map(async obj => {
 		const artist = obj.artistMetadata;
 		return await getArtistEverything(artist).catch(err => {
-			console.debug("Could not fetch all releases - error code: " + err.status);
+			console.debug("모든 아티스트 목록을 불러오지 못했습니다. - 애러코드: " + err.status);
 			if ((err.status = 500)) {
-				console.debug(`Missing releases from ${count()} artists`);
+				console.debug(`${count()}명의 아티스트 누락`);
 			}
 		});
 	});
