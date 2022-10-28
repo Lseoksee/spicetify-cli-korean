@@ -85,7 +85,7 @@ function PopupLyrics() {
 
 			const lines = body.lines;
 			if (!lines || !lines.length || typeof lines[0].time !== "number") {
-				return { error: "No lyrics" };
+				return { error: "가사없음" };
 			}
 
 			const lyrics = lines.map(a => ({
@@ -129,7 +129,7 @@ function PopupLyrics() {
 				if (body["matcher.track.get"].message.header.status_code !== 200) {
 					let head = body["matcher.track.get"].message.header;
 					return {
-						error: `Requested error: ${head.status_code}: ${head.hint} - ${head.mode}`
+						error: `요청오류: ${head.status_code}: ${head.hint} - ${head.mode}`
 					};
 				}
 
@@ -139,9 +139,9 @@ function PopupLyrics() {
 				const isInstrumental = meta.track.instrumental;
 
 				if (isRestricted) {
-					return { error: "Unfortunately we're not authorized to show these lyrics." };
+					return { error: "이 가사를 표시할 권한이 없습니다." };
 				} else if (isInstrumental) {
-					return { error: "Instrumental" };
+					return { error: "♪ 전주곡 ♪" };
 				} else if (hasSynced) {
 					const subtitle = body["track.subtitles.get"].message.body.subtitle_list[0].subtitle;
 
@@ -151,7 +151,7 @@ function PopupLyrics() {
 					}));
 					return { lyrics };
 				} else {
-					return { error: "No lyrics" };
+					return { error: "가사없음" };
 				}
 			} catch (err) {
 				return { error: err.message };
@@ -171,7 +171,7 @@ function PopupLyrics() {
 			const searchResults = await CosmosAsync.get(finalURL, null, requestHeader);
 			const items = searchResults.result.songs;
 			if (!items || !items.length) {
-				return { error: "Cannot find track" };
+				return { error: "해당트랙을 찾을 수 없습니다." };
 			}
 
 			const album = LyricUtils.capitalize(info.album);
@@ -182,7 +182,7 @@ function PopupLyrics() {
 			let lyricStr = meta.lrc;
 
 			if (!lyricStr || !lyricStr.lyric) {
-				return { error: "No lyrics" };
+				return { error: "가사없음" };
 			}
 			lyricStr = lyricStr.lyric;
 
@@ -245,7 +245,7 @@ function PopupLyrics() {
 				});
 
 			if (!lyrics.length) {
-				return { error: "No synced lyrics" };
+				return { error: "실시간가사 없음" };
 			}
 
 			return { lyrics };
@@ -265,18 +265,18 @@ function PopupLyrics() {
 			netease: {
 				on: boolLocalStorage("popup-lyrics:services:netease:on"),
 				call: LyricProviders.fetchNetease,
-				desc: `Crowdsourced lyrics provider ran by Chinese developers and users.`
+				desc: `중국에서 운영하는 실시간 가사 서비스입니다. (정확도 떨어짐)`
 			},
 			musixmatch: {
 				on: boolLocalStorage("popup-lyrics:services:musixmatch:on"),
 				call: LyricProviders.fetchMusixmatch,
-				desc: `Fully compatible with Spotify. Requires a token that can be retrieved from the official Musixmatch app. Follow instructions on <a href="https://github.com/khanhas/spicetify-cli/wiki/Musixmatch-Token">spicetify Wiki</a>.`,
+				desc: `Spotify와 완벽하게 호환이 됩니다. 공식 Musixmatch 앱에서 검색할 수 있는 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">토큰이 필요합니다</a>.`,
 				token: LocalStorage.get("popup-lyrics:services:musixmatch:token") || "2005218b74f939209bda92cb633c7380612e14cb7fe92dcd6a780f"
 			},
 			spotify: {
 				on: boolLocalStorage("popup-lyrics:services:spotify:on"),
 				call: LyricProviders.fetchSpotify,
-				desc: `Lyrics officially provided by Spotify. Only available for some regions/countries' users (e.g., Japan, Vietnam, Thailand).`
+				desc: `Spotify에서 공식으로 지원되는 가사입니다.`
 			}
 		},
 		servicesOrder: []
@@ -399,7 +399,7 @@ function PopupLyrics() {
 			}
 		}
 		if (error || !sharedData.lyrics) {
-			sharedData = { error: "No lyrics" };
+			sharedData = { error: "가사없음" };
 		}
 	}
 
@@ -711,17 +711,17 @@ function PopupLyrics() {
 		const { error, lyrics } = sharedData;
 
 		if (error) {
-			if (error === "Instrumental") {
+			if (error === "♪ 전주곡 ♪") {
 				drawText(lyricCtx, error);
 			} else {
 				drawText(lyricCtx, error, "red");
 			}
 		} else if (!lyrics) {
-			drawText(lyricCtx, "No lyrics");
+			drawText(lyricCtx, "가사없음");
 		} else if (audio.duration && lyrics.length) {
 			renderLyrics(lyricCtx, lyrics, audio.currentTime);
 		} else if (!audio.duration || lyrics.length === 0) {
-			drawText(lyricCtx, audio.currentSrc ? "Loading" : "Waiting");
+			drawText(lyricCtx, audio.currentSrc ? "가사찾는중..." : "불러오는중...");
 		}
 		if (lyrics && lyrics.length) {
 			if (document.hidden) {
@@ -814,20 +814,20 @@ button.switch.small {
 }
 `;
 			const optionHeader = document.createElement("h2");
-			optionHeader.innerText = "Options";
-			const smooth = createSlider("Smooth scrolling", userConfigs.smooth, state => {
+			optionHeader.innerText = "설정";
+			const smooth = createSlider("부드럽게 진행", userConfigs.smooth, state => {
 				userConfigs.smooth = state;
 				LocalStorage.set("popup-lyrics:smooth", String(state));
 			});
-			const center = createSlider("Center align", userConfigs.centerAlign, state => {
+			const center = createSlider("중앙정렬", userConfigs.centerAlign, state => {
 				userConfigs.centerAlign = state;
 				LocalStorage.set("popup-lyrics:center-align", String(state));
 			});
-			const cover = createSlider("Show cover", userConfigs.showCover, state => {
+			const cover = createSlider("앨범커버표시", userConfigs.showCover, state => {
 				userConfigs.showCover = state;
 				LocalStorage.set("popup-lyrics:show-cover", String(state));
 			});
-			const ratio = createOptions("Aspect ratio", { 11: "1:1", 43: "4:3", 169: "16:9" }, userConfigs.ratio, state => {
+			const ratio = createOptions("화면비율", { 11: "1:1", 43: "4:3", 169: "16:9" }, userConfigs.ratio, state => {
 				userConfigs.ratio = state;
 				LocalStorage.set("popup-lyrics:ratio", state);
 				let value = lyricVideo.width;
@@ -846,7 +846,7 @@ button.switch.small {
 				offscreenCtx = null;
 			});
 			const fontSize = createOptions(
-				"Font size",
+				"폰트크기",
 				{
 					30: "30px",
 					34: "34px",
@@ -864,7 +864,7 @@ button.switch.small {
 				}
 			);
 			const blurSize = createOptions(
-				"Blur size",
+				"블러크기",
 				{
 					2: "2px",
 					5: "5px",
@@ -877,13 +877,13 @@ button.switch.small {
 					LocalStorage.set("popup-lyrics:blur-size", state);
 				}
 			);
-			const delay = createOptionsInput("Delay", String(userConfigs.delay), state => {
+			const delay = createOptionsInput("가사싱크", String(userConfigs.delay), state => {
 				userConfigs.delay = Number(state);
 				LocalStorage.set("popup-lyrics:delay", state);
 			});
 
 			const serviceHeader = document.createElement("h2");
-			serviceHeader.innerText = "Services";
+			serviceHeader.innerText = "가사제공";
 
 			const serviceContainer = document.createElement("div");
 
