@@ -43,9 +43,9 @@ SpicetifyHomeConfig = {};
 	};
 
 	const up = document.createElement("button");
-	up.innerText = "Up";
+	up.innerText = "위로";
 	const down = document.createElement("button");
-	down.innerText = "Down";
+	down.innerText = "아래로";
 	const lower = document.createElement("button");
 	const stick = document.createElement("button");
 	const style = document.createElement("style");
@@ -142,8 +142,8 @@ SpicetifyHomeConfig = {};
 					down.onclick = () => onSwap(el, 1);
 				}
 
-				stick.innerText = status === STICKY ? "Unstick" : "Stick";
-				lower.innerText = status === LOWERED ? "Unlower" : "Lower";
+				stick.innerText = status === STICKY ? "고정해제" : "상단에 고정";
+				lower.innerText = status === LOWERED ? "표시하기" : "숨기기";
 				lower.onclick = () => onChangeStatus(el, LOWERED);
 				stick.onclick = () => onChangeStatus(el, STICKY);
 
@@ -157,7 +157,7 @@ SpicetifyHomeConfig = {};
 		elem.forEach(a => (a.onmouseover = undefined));
 	}
 
-	const menu = new Spicetify.Menu.Item("Home config", false, self => {
+	const menu = new Spicetify.Menu.Item("홈 화면 수정하기", false, self => {
 		self.isEnabled = !self.isEnabled;
 		if (self.isEnabled) {
 			injectInteraction();
