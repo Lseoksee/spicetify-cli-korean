@@ -181,10 +181,10 @@ function openConfig() {
 					defaultValue: CONFIG["range"],
 					type: ConfigSelection,
 					options: {
-						30: "30 days",
-						60: "60 days",
-						90: "90 days",
-						120: "120 days"
+						30: "30 일",
+						60: "60 일",
+						90: "90 일",
+						120: "120 일"
 					},
 					when: () => true
 				},
