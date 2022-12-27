@@ -640,7 +640,7 @@ class LyricsContainer extends react.Component {
 				react.createElement(
 					Spicetify.ReactComponent.TooltipWrapper,
 					{
-						label: "Lyrics from file",
+						label: "가사파일 불러오기",
 						showDelay: 100
 					},
 					react.createElement(

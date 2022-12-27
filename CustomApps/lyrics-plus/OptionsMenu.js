@@ -94,24 +94,24 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded })
 			menu: react.createElement(
 				Spicetify.ReactComponent.Menu,
 				{},
-				react.createElement("h3", null, " Conversions"),
+				react.createElement("h3", null, "가사 변환하기"),
 				translatorLoaded
 					? react.createElement(OptionList, {
 							items: [
 								{
-									desc: "Mode",
+									desc: "번환옵션",
 									key: "translation-mode",
 									type: ConfigSelection,
 									options: {
-										furigana: "Furigana",
-										romaji: "Romaji",
-										hiragana: "Hiragana",
-										katakana: "Katakana"
+										furigana: "후리가나",
+										romaji: "로마자",
+										hiragana: "히라가나",
+										katakana: "가타카나"
 									},
 									renderInline: true
 								},
 								{
-									desc: "Convert",
+									desc: "변환하기",
 									key: "translate",
 									type: ConfigSlider,
 									trigger: "click",
