@@ -85,8 +85,24 @@ const OptionsMenu = react.memo(({ options, onSelect, selected, defaultValue, bol
 	);
 });
 
-const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded }) => {
+const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, isJapanese, hasNeteaseTranslation }) => {
 	if (!showTranslationButton) return null;
+
+	let menuOptions = null;
+	if (isJapanese) {
+		menuOptions = {
+			furigana: "후리가나",
+			romaji: "로마자",
+			hiragana: "히라가나",
+			katakana: "가타카나"
+		};
+	}
+	if (hasNeteaseTranslation) {
+		menuOptions = {
+			...menuOptions,
+			neteaseTranslation: "Netease"
+		};
+	}
 
 	return react.createElement(
 		Spicetify.ReactComponent.ContextMenu,
@@ -95,19 +111,14 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded })
 				Spicetify.ReactComponent.Menu,
 				{},
 				react.createElement("h3", null, "가사 변환하기"),
-				translatorLoaded
+				translatorLoaded || !isJapanese
 					? react.createElement(OptionList, {
 							items: [
 								{
-									desc: "번환옵션",
+									desc: "Mode",
 									key: "translation-mode",
 									type: ConfigSelection,
-									options: {
-										furigana: "후리가나",
-										romaji: "로마자",
-										hiragana: "히라가나",
-										katakana: "가타카나"
-									},
+									options: menuOptions,
 									renderInline: true
 								},
 								{
