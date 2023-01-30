@@ -88,6 +88,8 @@ const OptionsMenu = react.memo(({ options, onSelect, selected, defaultValue, bol
 const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, isJapanese, hasNeteaseTranslation }) => {
 	if (!showTranslationButton) return null;
 
+	let translator = new Translator();
+
 	let menuOptions = null;
 	if (isJapanese) {
 		menuOptions = {
@@ -110,38 +112,33 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, i
 			menu: react.createElement(
 				Spicetify.ReactComponent.Menu,
 				{},
-				react.createElement("h3", null, "가사 변환하기"),
-				translatorLoaded || !isJapanese
-					? react.createElement(OptionList, {
-							items: [
-								{
-									desc: "Mode",
-									key: "translation-mode",
-									type: ConfigSelection,
-									options: menuOptions,
-									renderInline: true
-								},
-								{
-									desc: "변환하기",
-									key: "translate",
-									type: ConfigSlider,
-									trigger: "click",
-									action: "toggle",
-									renderInline: true
-								}
-							],
-							onChange: (name, value) => {
-								CONFIG.visual[name] = value;
-								localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
-								lyricContainerUpdate && lyricContainerUpdate();
-							}
-					  })
-					: react.createElement(
-							"div",
-							null,
-							react.createElement("p1", null, "Loading"),
-							react.createElement("div", { class: "lyrics-translation-spinner" }, "")
-					  )
+				react.createElement("h3", null, " 가사 변환하기"),
+				react.createElement(OptionList, {
+					items: [
+						{
+							desc: "Mode",
+							key: "translation-mode",
+							type: ConfigSelection,
+							options: menuOptions,
+							renderInline: true
+						},
+						{
+							desc: "변환하기",
+							key: "translate",
+							type: ConfigSlider,
+							trigger: "click",
+							action: "toggle",
+							renderInline: true
+						}
+					],
+					onChange: (name, value) => {
+						CONFIG.visual[name] = value;
+						localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
+						lyricContainerUpdate && lyricContainerUpdate();
+						CONFIG.visual[name] ? Spicetify.showNotification("Translating...", false, 500) : null;
+						translator.injectExternals();
+					}
+				})
 			),
 			trigger: "click",
 			action: "toggle",
