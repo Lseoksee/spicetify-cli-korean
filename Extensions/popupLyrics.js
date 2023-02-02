@@ -721,7 +721,7 @@ function PopupLyrics() {
 		} else if (audio.duration && lyrics.length) {
 			renderLyrics(lyricCtx, lyrics, audio.currentTime);
 		} else if (!audio.duration || lyrics.length === 0) {
-			drawText(lyricCtx, audio.currentSrc ? "가사찾는중..." : "불러오는중...");
+			drawText(lyricCtx, audio.currentSrc ? "로딩중..." : "불러오는중...");
 		}
 		if (lyrics && lyrics.length) {
 			if (document.hidden) {

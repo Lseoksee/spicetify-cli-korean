@@ -116,7 +116,7 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, i
 				react.createElement(OptionList, {
 					items: [
 						{
-							desc: "Mode",
+							desc: "모드",
 							key: "translation-mode",
 							type: ConfigSelection,
 							options: menuOptions,
@@ -135,7 +135,7 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, i
 						CONFIG.visual[name] = value;
 						localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
 						lyricContainerUpdate && lyricContainerUpdate();
-						CONFIG.visual[name] ? Spicetify.showNotification("Translating...", false, 500) : null;
+						CONFIG.visual[name] ? Spicetify.showNotification("변환중...", false, 500) : null;
 						translator.injectExternals();
 					}
 				})
