@@ -11,7 +11,7 @@
 
 
 Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
-윈도우, MacOS and 리눅스를 지원합니다.
+윈도우, MacOS, 리눅스를 지원합니다.
 
 <img src=".github/assets/logo.png" alt="img" align="right" width="560px" height="400px">  
 
