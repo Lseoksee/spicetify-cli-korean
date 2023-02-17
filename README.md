@@ -23,7 +23,7 @@ Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
 - 성능 향상을 위한 불필요한 요소 제거
 
 
-### Links
+### 링크
 - [설치](https://spicetify.app/docs/getting-started)
 - [사용법](https://spicetify.app/docs/getting-started#basic-usage)
 - [FAQ](https://spicetify.app/docs/faq)
