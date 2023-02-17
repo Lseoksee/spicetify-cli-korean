@@ -10,21 +10,21 @@
 ---
 
 
-Command-line tool to customize the official Spotify client.
-Supports Windows, MacOS and Linux.
+Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
+윈도우, MacOS and 리눅스를 지원합니다.
 
 <img src=".github/assets/logo.png" alt="img" align="right" width="560px" height="400px">  
 
-### Features
-- Change colors whole UI
-- Inject CSS for advanced customization
-- Inject Extensions (Javascript script) to extend functionalities, manipulate UI and control player.
-- Inject Custom apps
-- Remove bloated components to improve performance
+### 기능
+- 색상과 UI변경
+- 고급 사용자정의 CSS 지원
+- 확장프로그램 (Javascript script)을 이용하여 기능을 확장하고 제어
+- 맞춤 앱 지원
+- 성능 향상을 위한 불필요한 요소 제거
 
 
 ### Links
-- [Installation](https://spicetify.app/docs/getting-started)
-- [Basic Usage](https://spicetify.app/docs/getting-started#basic-usage)
+- [설치](https://spicetify.app/docs/getting-started)
+- [사용법](https://spicetify.app/docs/getting-started#basic-usage)
 - [FAQ](https://spicetify.app/docs/faq)
   
