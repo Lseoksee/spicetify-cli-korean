@@ -180,8 +180,9 @@ const SyncedLyricsPage = react.memo(({ lyrics = [], provider, copyright, isKara 
 								Spicetify.Player.seek(startTime);
 							}
 						},
-						onAuxClick: async event => {
-							await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
+						onContextMenu: event => {
+							event.preventDefault();
+							Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
 								.then(() => Spicetify.showNotification("가사를 복사했습니다"))
 								.catch(() => Spicetify.showNotification("가사 복사 오류"));
 						}
@@ -417,8 +418,9 @@ const SyncedExpandedLyricsPage = react.memo(({ lyrics, provider, copyright, isKa
 							Spicetify.Player.seek(startTime);
 						}
 					},
-					onAuxClick: async event => {
-						await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
+					onContextMenu: event => {
+						event.preventDefault();
+						Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
 							.then(() => Spicetify.showNotification("가사를 복사했습니다"))
 							.catch(() => Spicetify.showNotification("가사 복사 오류"));
 					}
@@ -454,8 +456,9 @@ const UnsyncedLyricsPage = react.memo(({ lyrics, provider, copyright }) => {
 				{
 					className: "lyrics-lyricsContainer-LyricsLine lyrics-lyricsContainer-LyricsLine-active",
 					dir: "auto",
-					onAuxClick: async event => {
-						await Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
+					onContextMenu: event => {
+						event.preventDefault();
+						Spicetify.Platform.ClipboardAPI.copy(rawLyrics)
 							.then(() => Spicetify.showNotification("가사를 복사했습니다"))
 							.catch(() => Spicetify.showNotification("가사 복사 오류"));
 					}
