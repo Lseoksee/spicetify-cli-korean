@@ -477,8 +477,8 @@ function openConfig() {
 					when: () => !CONFIG.visual["colorful"]
 				},
 				{
-					desc: "Text convertion: Chinese-Japanese Detection threshold (Advanced)",
-					info: "Checks if whenever Hanzi/Kanji or Kana is dominant in lyrics. If the result passes the threshold, it's most likely Japanese, and vice versa. This setting is in percentage.",
+					desc: "텍스트 변환: 중국어-일본어 감지 임계값(고급)",
+					info: "한자/일어한자 또는 가나가 가사에서 우세할 때마다 확인합니다. 결과가 임계값을 통과하면 일본어일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
 					key: "ja-detect-threshold",
 					type: ConfigAdjust,
 					min: thresholdSizeLimit.min,
