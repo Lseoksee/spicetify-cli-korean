@@ -85,19 +85,31 @@ const OptionsMenu = react.memo(({ options, onSelect, selected, defaultValue, bol
 	);
 });
 
-const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, isJapanese, hasNeteaseTranslation }) => {
+const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, hasNeteaseTranslation }) => {
 	if (!showTranslationButton) return null;
 
 	let translator = new Translator();
 
 	let menuOptions = null;
-	if (isJapanese) {
-		menuOptions = {
-			furigana: "후리가나",
-			romaji: "로마자",
-			hiragana: "히라가나",
-			katakana: "가타카나"
-		};
+
+	switch (friendlyLanguage) {
+		case "japanese": {
+			menuOptions = {
+				furigana: "후리가나",
+				romaji: "로마자",
+				hiragana: "히라가나",
+				katakana: "가타카나"
+			};
+			break;
+		}
+		case "chinese": {
+			menuOptions = {
+				cn: "중국어",
+				hk: "중국어 (홍콩)",
+				tw: "중국어 (대만)"
+			};
+			break;
+		}
 	}
 	if (hasNeteaseTranslation) {
 		menuOptions = {
@@ -116,8 +128,8 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, i
 				react.createElement(OptionList, {
 					items: [
 						{
-							desc: "모드",
-							key: "translation-mode",
+							desc: "Mode",
+							key: `모드:${friendlyLanguage}`,
 							type: ConfigSelection,
 							options: menuOptions,
 							renderInline: true
@@ -157,7 +169,7 @@ const TranslationMenu = react.memo(({ showTranslationButton, translatorLoaded, i
 					viewBox: "0 0 16 10.3",
 					fill: "currentColor"
 				},
-				"あ"
+				"⇄"
 			)
 		)
 	);
