@@ -486,8 +486,8 @@ function openConfig() {
 					step: thresholdSizeLimit.step
 				},
 				{
-					desc: "Text convertion: Traditional-Simplified Detection threshold (Advanced)",
-					info: "Checks if whenever Traditional or Simplified is dominant in lyrics. If the result passes the threshold, it's most likely Simplified, and vice versa. This setting is in percentage.",
+					desc: "텍스트 변환: 번체-간체 감지 임계값(고급)",
+					info: "가사에서 번체 또는 간체가 우세한지 확인합니다. 결과가 임계값을 통과하면 간체일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
 					key: "hans-detect-threshold",
 					type: ConfigAdjust,
 					min: thresholdSizeLimit.min,
