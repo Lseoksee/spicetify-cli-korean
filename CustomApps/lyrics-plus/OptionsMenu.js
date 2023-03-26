@@ -128,8 +128,8 @@ const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, h
 				react.createElement(OptionList, {
 					items: [
 						{
-							desc: "Mode",
-							key: `모드:${friendlyLanguage}`,
+							desc: "모드",
+							key: `translation-mode:${friendlyLanguage}`,
 							type: ConfigSelection,
 							options: menuOptions,
 							renderInline: true
