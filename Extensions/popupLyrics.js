@@ -382,24 +382,21 @@ function PopupLyrics() {
 			uri: Player.data.track.uri
 		};
 
-		sharedData = { lyrics: [] };
-		let error = null;
-
 		for (let name of userConfigs.servicesOrder) {
 			const service = userConfigs.services[name];
 			if (!service.on) continue;
+			sharedData = { lyrics: [] };
 
 			try {
 				const data = await service.call(info);
 				console.log(data);
 				sharedData = data;
-				return;
+				if (!sharedData.error) {
+					return;
+				}
 			} catch (err) {
-				error = err;
+				sharedData = { error: "가사없음" };
 			}
-		}
-		if (error || !sharedData.lyrics) {
-			sharedData = { error: "가사없음" };
 		}
 	}
 
