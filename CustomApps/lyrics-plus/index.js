@@ -81,7 +81,7 @@ const CONFIG = {
 		},
 		local: {
 			on: getConfig("lyrics-plus:provider:local:on"),
-			desc: `Provide lyrics from cache/local files loaded from previous Spotify sessions.`,
+			desc: `이전 Spotify 세션에서 저장한가사/로컬파일 가사를 불러옵니다. `,
 			modes: [KARAOKE, SYNCED, UNSYNCED]
 		}
 	},
@@ -409,7 +409,7 @@ class LyricsContainer extends react.Component {
 					.map(key => `<strong>${key}</strong>`);
 
 				if (!parsedKeys.length) {
-					Spicetify.showNotification("Nothing to load", true);
+					Spicetify.showNotification("아무것도 불러오지 못했습니다.", true);
 					return;
 				}
 
@@ -417,16 +417,16 @@ class LyricsContainer extends react.Component {
 				CACHE[this.currentTrackUri] = { ...localLyrics, provider: "local", uri: this.currentTrackUri };
 				this.saveLocalLyrics(this.currentTrackUri, localLyrics);
 
-				Spicetify.showNotification(`Loaded ${parsedKeys.join(", ")} lyrics from file`);
+				Spicetify.showNotification(`${parsedKeys.join(", ")} 가사를 로드 했습니다.`);
 			} catch (e) {
 				console.error(e);
-				Spicetify.showNotification("Failed to load lyrics", true);
+				Spicetify.showNotification("가사를 불러오지 못했습니다.", true);
 			}
 		};
 
 		reader.onerror = e => {
 			console.error(e);
-			Spicetify.showNotification("Failed to read file", true);
+			Spicetify.showNotification("파일을 읽지 못했습니다.", true);
 		};
 
 		reader.readAsText(file[0]);
@@ -686,7 +686,7 @@ class LyricsContainer extends react.Component {
 				react.createElement(
 					Spicetify.ReactComponent.TooltipWrapper,
 					{
-						label: this.state.isCached ? "Lyrics cached" : "Cache lyrics",
+						label: this.state.isCached ? "가사 저장됨" : "가사 저장하기",
 						showDelay: 100
 					},
 					react.createElement(
@@ -696,12 +696,12 @@ class LyricsContainer extends react.Component {
 							onClick: () => {
 								const { synced, unsynced, karaoke } = this.state;
 								if (!synced && !unsynced && !karaoke) {
-									Spicetify.showNotification("No lyrics to cache.", true);
+									Spicetify.showNotification("저장할 가사가 없습니다.", true);
 									return;
 								}
 
 								this.saveLocalLyrics(this.currentTrackUri, { synced, unsynced, karaoke });
-								Spicetify.showNotification("Lyrics cached.");
+								Spicetify.showNotification("가사를 저장했습니다.");
 							}
 						},
 						react.createElement("svg", {
@@ -718,7 +718,7 @@ class LyricsContainer extends react.Component {
 				react.createElement(
 					Spicetify.ReactComponent.TooltipWrapper,
 					{
-						label: "Load lyrics from file",
+						label: "가사파일 불러오기",
 						showDelay: 100
 					},
 					react.createElement(

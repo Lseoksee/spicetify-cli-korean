@@ -50,7 +50,7 @@ const CacheButton = () => {
 	}
 
 	const [count, setCount] = useState(Object.keys(lyrics).length);
-	const text = !count ? "Clear cached lyrics" : "No cached lyrics";
+	const text = !count ? "저장된 가사 없음" : "저장된 가사 지우기";
 
 	return react.createElement(
 		"button",
