@@ -65,7 +65,7 @@ const CONFIG = {
 		},
 		musixmatch: {
 			on: getConfig("lyrics-plus:provider:musixmatch:on"),
-			desc: `Spotify와 완벽하게 호환이 됩니다. 공식 Musixmatch 앱에서 검색할 수 있는 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">토큰이 필요합니다</a>.`,
+			desc: `Spotify와 완벽하게 호환이 됩니다. 원활하게 가사를 불러오려면 하단 값을<a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work"> 해당 문서를 참조하여 </a>얻은 토큰 값으로 수정해 주세요.`,
 			token: localStorage.getItem("lyrics-plus:provider:musixmatch:token") || "21051986b9886beabe1ce01c3ce94c96319411f8f2c122676365e3",
 			modes: [SYNCED, UNSYNCED]
 		},

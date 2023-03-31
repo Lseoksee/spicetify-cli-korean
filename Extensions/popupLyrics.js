@@ -270,7 +270,7 @@ function PopupLyrics() {
 			musixmatch: {
 				on: boolLocalStorage("popup-lyrics:services:musixmatch:on"),
 				call: LyricProviders.fetchMusixmatch,
-				desc: `Spotify와 완벽하게 호환이 됩니다. 공식 Musixmatch 앱에서 검색할 수 있는 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">토큰이 필요합니다</a>.`,
+				desc: `Spotify와 완벽하게 호환이 됩니다. 원활하게 가사를 불러오려면 하단 값을 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">해당 문서를 참조하여</a> 얻은 토큰 값으로 수정해 주세요.`,
 				token: LocalStorage.get("popup-lyrics:services:musixmatch:token") || "2005218b74f939209bda92cb633c7380612e14cb7fe92dcd6a780f"
 			},
 			spotify: {
