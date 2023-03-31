@@ -112,7 +112,8 @@ const Spicetify = {
             "Config",
             "expFeatureOverride",
             "createInternalMap",
-            "RemoteConfigResolver"
+            "RemoteConfigResolver",
+            "Playbar"
         ];
 
         const PLAYER_METHOD = [
@@ -1203,6 +1204,48 @@ Spicetify.PopupModal = new _HTMLGenericModal();
 
 Spicetify.ReactComponent = {};
 
+Object.defineProperty(Spicetify, "TippyProps", {
+    value: {
+        delay: [200, 0],
+        animation: true,
+        render(instance) {
+            const popper = document.createElement('div');
+            const box = document.createElement('div');
+
+            popper.id = "context-menu";
+            popper.appendChild(box);
+
+            box.className = "main-contextMenu-tippy"
+            box.textContent = instance.props.content;
+
+            function onUpdate(prevProps, nextProps) {
+              if (prevProps.content !== nextProps.content) {
+                if (nextProps.allowHTML) box.innerHTML = nextProps.content;
+                else box.textContent = nextProps.content;
+              }
+            }
+
+            return { popper, onUpdate }
+        },
+        onShow(instance) {
+            instance.popper.firstChild.classList.add("main-contextMenu-tippyEnter");
+        },
+        onMount(instance) {
+            requestAnimationFrame(() => {
+                instance.popper.firstChild.classList.remove("main-contextMenu-tippyEnter");
+                instance.popper.firstChild.classList.add("main-contextMenu-tippyEnterActive");
+            });
+        },
+        onHide(instance) {
+            requestAnimationFrame(() => {
+                instance.popper.firstChild.classList.remove("main-contextMenu-tippyEnterActive");
+                instance.unmount();
+            });
+        },
+    },
+    writable: false,
+});
+
 Spicetify.Topbar = (function() {
     let leftContainer;
     const buttonsStash = new Set();
@@ -1211,17 +1254,23 @@ Spicetify.Topbar = (function() {
         constructor(label, icon, onClick, disabled = false) {
             this.element = document.createElement("button");
             this.element.classList.add("main-topBar-button");
-            this.label = label;
             this.icon = icon;
             this.onClick = onClick;
             this.disabled = disabled;
+            this.tippy = Spicetify.Tippy?.(this.element, {
+                content: label,
+                placement: "bottom",
+                ...Spicetify.TippyProps,
+            });
+            this.label = label;
             buttonsStash.add(this.element);
             leftContainer?.append(...buttonsStash);
         }
         get label() { return this._label; }
         set label(text) {
             this._label = text;
-            this.element.setAttribute("title", text);
+            if (!this.tippy) this.element.setAttribute("title", text);
+            else this.tippy.setContent(text);
         }
         get icon() { return this._icon; }
         set icon(input) {
@@ -1274,6 +1323,85 @@ Spicetify.Topbar = (function() {
             });
         });
         observer.observe(topBar, {childList: true});
+    })();
+
+    return { Button };
+})();
+
+Spicetify.Playbar = (function() {
+    let rightContainer;
+    let sibling;
+    const buttonsStash = new Set();
+
+    class Button {
+        constructor(label, icon, onClick, disabled = false, active = false) {
+            this.element = document.createElement("button");
+            this.element.classList.add("main-genericButton-button");
+            this.element.style.display = "block";
+            this.icon = icon;
+            this.onClick = onClick;
+            this.disabled = disabled;
+            this.active = active;
+            Array.from(sibling?.classList ?? []).forEach((className) => {
+                if (!className.startsWith("main-genericButton")) {
+                    this.element.classList.add(className);
+                }
+            });
+            this.tippy = Spicetify.Tippy?.(this.element, {
+                content: label,
+                ...Spicetify.TippyProps,
+            });
+            this.label = label;
+            buttonsStash.add(this.element);
+            rightContainer?.prepend(...buttonsStash);
+        }
+        get label() { return this._label; }
+        set label(text) {
+            this._label = text;
+            if (!this.tippy) this.element.setAttribute("title", text);
+            else this.tippy.setContent(text);
+        }
+        get icon() { return this._icon; }
+        set icon(input) {
+            if (input && Spicetify.SVGIcons[input]) {
+                input = `<svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor">${Spicetify.SVGIcons[input]}</svg>`;
+            }
+            this._icon = input;
+            this.element.innerHTML = input;
+        }
+        get onClick() { return this._onClick; }
+        set onClick(func) {
+            this._onClick = func;
+            this.element.onclick = () => this._onClick(this);
+        }
+        get disabled() { return this._disabled; }
+        set disabled(bool) {
+            this._disabled = bool;
+            this.element.disabled = bool;
+            this.element.classList.toggle("disabled", bool);
+        }
+        set active(bool) {
+            this._active = bool;
+            this.element.classList.toggle("main-genericButton-buttonActive", bool);
+        }
+        get active() { return this._active; }
+    }
+
+    (function waitForPlaybarMounted() {
+        sibling = document.querySelector(".main-nowPlayingBar-right .main-genericButton-button");
+        rightContainer = document.querySelector(".main-nowPlayingBar-right > div");
+        if (!rightContainer) {
+            setTimeout(waitForPlaybarMounted, 300);
+            return;
+        }
+        Array.from(sibling?.classList ?? []).forEach((className) => {
+            if (!className.startsWith("main-genericButton")) {
+                buttonsStash.forEach((button) => {
+                    button.classList.add(className);
+                });
+            }
+        });
+        rightContainer.prepend(...buttonsStash);
     })();
 
     return { Button };

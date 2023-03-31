@@ -1039,6 +1039,23 @@ declare namespace Spicetify {
             onClick: (self: Button) => void;
             disabled: boolean;
             element: HTMLButtonElement;
+            tippy: any;
+        }
+    }
+
+    /**
+     * Add button in player controls
+     */
+    namespace Playbar {
+        class Button {
+            constructor(label: string, icon: string, onClick: (self: Button) => void, disabled?: boolean, active?: boolean);
+            label: string;
+            icon: string;
+            onClick: (self: Button) => void;
+            disabled: boolean;
+            active: boolean;
+            element: HTMLButtonElement;
+            tippy: any;
         }
     }
 
@@ -1066,4 +1083,14 @@ declare namespace Spicetify {
         const extensions: string[];
         const custom_apps: string[];
     }
+
+    /**
+     * Tippy.js instance used by Spotify
+     */
+    const Tippy: any;
+    /**
+     * Spicetify's predefined props for Tippy.js
+     * Used to mimic Spotify's tooltip behavior
+     */
+    const TippyProps: any;
 }

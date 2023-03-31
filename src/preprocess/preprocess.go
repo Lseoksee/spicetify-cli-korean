@@ -186,6 +186,10 @@ func colorVariableReplace(content string) string {
 	utils.Replace(&content, "#282828", "var(--spice-card)")
 
 	utils.Replace(&content, "#121212", "var(--spice-main)")
+	utils.Replace(&content, "#242424", "var(--spice-main-elevated)")
+
+	utils.Replace(&content, "#1a1a1a", "var(--spice-highlight)")
+	utils.Replace(&content, "#2a2a2a", "var(--spice-highlight-elevated)")
 
 	utils.Replace(&content, "#000", "var(--spice-sidebar)")
 	utils.Replace(&content, "#000000", "var(--spice-sidebar)")
@@ -373,7 +377,7 @@ Spicetify.React.useEffect(() => {
 		`${1}=Spicetify.ReactComponent.PlaylistMenu${2}`)
 
 	// React Component: Tooltip Wrapper
-	utils.Replace(
+	utils.ReplaceOnce(
 		&input,
 		`(\w+)(=(?:function\([\{\w\}:,]+\)|\()\{(?:[\w. =]*(?:label|children|renderInline|showDelay)[\w:]*,?){4})`,
 		`${1}=Spicetify.ReactComponent.TooltipWrapper${2}`)
@@ -499,6 +503,11 @@ if (${1}.popper?.firstChild?.id === "context-menu") {
 		&input,
 		`(\w+ [\w$_]+)=[\w$_]+\([\w$_]+>>>0\)`,
 		`${1}=Spicetify._getStyledClassName(arguments,this)`)
+
+	utils.Replace(
+		&input,
+		`([\w$_]+)\.setDefaultProps=`,
+		`Spicetify.Tippy=${1};${0}`)
 
 	return input
 }
