@@ -195,7 +195,7 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
 							step: fontSizeLimit.step
 						},
 						{
-							desc: "가사싱크",
+							desc: "가사 싱크",
 							key: "delay",
 							type: ConfigAdjust,
 							min: -10000,

@@ -432,8 +432,8 @@ function openConfig() {
 		react.createElement(OptionList, {
 			items: [
 				{
-					desc: "가사 싱크",
-					info: "모든 트랙에 가사 싱크 오프셋을 조정합니다.",
+					desc: "가사싱크",
+					info: "모든 트랙의 가사 싱크 오프셋을 조정합니다.",
 					key: "global-delay",
 					type: ConfigAdjust,
 					min: -10000,
