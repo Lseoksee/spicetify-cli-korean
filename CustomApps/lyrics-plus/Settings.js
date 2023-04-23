@@ -432,6 +432,15 @@ function openConfig() {
 		react.createElement(OptionList, {
 			items: [
 				{
+					desc: "가사 싱크",
+					info: "모든 트랙에 가사 싱크 오프셋을 조정합니다.",
+					key: "global-delay",
+					type: ConfigAdjust,
+					min: -10000,
+					max: 10000,
+					step: 250
+				},
+				{
 					desc: "폰트크기",
 					info: "(Ctrl + 마우스휠로 조정가능)",
 					key: "font-size",
@@ -527,7 +536,6 @@ function openConfig() {
 			],
 			onChange: (name, value) => {
 				CONFIG.visual[name] = value;
-				console.log(CONFIG.visual, APP_NAME, name, value);
 				localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
 				lyricContainerUpdate && lyricContainerUpdate();
 			}
