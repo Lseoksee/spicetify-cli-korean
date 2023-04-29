@@ -238,7 +238,7 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
 		react.createElement(
 			Spicetify.ReactComponent.TooltipWrapper,
 			{
-				label: "Adjustments"
+				label: "조정"
 			},
 			react.createElement(
 				"button",
