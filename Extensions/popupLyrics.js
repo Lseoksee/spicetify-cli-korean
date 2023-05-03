@@ -176,7 +176,7 @@ function PopupLyrics() {
 
 			const album = LyricUtils.capitalize(info.album);
 			let itemId = items.findIndex(val => LyricUtils.capitalize(val.album.name) === album || Math.abs(info.duration - val.duration) < 1000);
-			if (itemId === -1) return { error: "Cannot find track" };
+			if (itemId === -1) return { error: "해당트랙을 찾을 수 없습니다." };
 
 			const meta = await CosmosAsync.get(lyricURL + items[itemId].id, null, requestHeader);
 			let lyricStr = meta.lrc;
