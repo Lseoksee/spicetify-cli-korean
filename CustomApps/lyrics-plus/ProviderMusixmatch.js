@@ -116,7 +116,7 @@ const ProviderMusixmatch = (function () {
 		if (isInstrumental) {
 			return [{ text: "♪ 전주곡 ♪", startTime: "0000" }];
 		} else if (hasSynced) {
-			const subtitle = body["track.subtitles.get"]?.message?.body.subtitle_list?.[0]?.subtitle;
+			const subtitle = body["track.subtitles.get"]?.message?.body?.subtitle_list?.[0]?.subtitle;
 			if (!subtitle) {
 				return null;
 			}
