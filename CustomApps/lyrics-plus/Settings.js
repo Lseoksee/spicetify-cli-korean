@@ -432,6 +432,12 @@ function openConfig() {
 		react.createElement(OptionList, {
 			items: [
 				{
+					desc: "기존 가사 버튼 대체",
+					key: "playbar-button",
+					info: "Spotify의 가사 버튼을 가사+로 대체합니다.",
+					type: ConfigSlider
+				},
+				{
 					desc: "가사싱크",
 					info: "모든 트랙의 가사 싱크 오프셋을 조정합니다.",
 					key: "global-delay",
@@ -538,6 +544,15 @@ function openConfig() {
 				CONFIG.visual[name] = value;
 				localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
 				lyricContainerUpdate && lyricContainerUpdate();
+
+				const configChange = new CustomEvent("lyrics-plus", {
+					detail: {
+						type: "config",
+						name: name,
+						value: value
+					}
+				});
+				window.dispatchEvent(configChange);
 			}
 		}),
 		react.createElement("h2", null, "가사제공"),
