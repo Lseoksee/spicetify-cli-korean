@@ -21,7 +21,7 @@ class Card extends react.Component {
 
 	closeButtonClicked(event) {
 		removeCards(this.props.uri);
-		Spicetify.showNotification(`Dismissed <b>${this.title}</b> from <b>${this.artist.name}</b>`);
+		Spicetify.showNotification(`<b>${this.artist.name}</b>의 <b>${this.title}</b> 을(를) 숨깁니다`);
 		event.stopPropagation();
 	}
 
@@ -113,7 +113,7 @@ class Card extends react.Component {
 						),
 						react.createElement(
 							Spicetify.ReactComponent.TooltipWrapper,
-							{ label: "Dismiss" },
+							{ label: "숨기기" },
 							react.createElement(
 								"button",
 								{

@@ -280,7 +280,7 @@ function openConfig() {
 				{
 					className: "col description"
 				},
-				"Dismissed releases"
+				"숨겨진 항목 재설정"
 			),
 			react.createElement(
 				"div",

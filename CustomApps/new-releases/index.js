@@ -114,12 +114,12 @@ class Grid extends react.Component {
 	removeCards(id, type) {
 		switch (type) {
 			case "reset":
-				Spicetify.showNotification("Reset dismissed releases");
+				Spicetify.showNotification("숨겨진 모든 항목을 불러왔습니다");
 				dismissed = [];
 				break;
 			case "undo":
-				if (!dismissed[0]) Spicetify.showNotification("Nothing to undo", true);
-				else Spicetify.showNotification("Undone last dismiss");
+				if (!dismissed[0]) Spicetify.showNotification("취소할 항목이 없습니다", true);
+				else Spicetify.showNotification("최근에 숨긴 항목을 불러왔습니다");
 				dismissed.pop();
 				break;
 			default:
@@ -258,7 +258,7 @@ class Grid extends react.Component {
 						onClick: this.reload.bind(this)
 					}),
 					react.createElement(ButtonText, {
-						text: "undo", // no locale for this
+						text: "되돌리기", // no locale for this
 						onClick: this.removeCards.bind(this, null, "undo")
 					})
 				)
