@@ -118,7 +118,7 @@ class Grid extends react.Component {
 				dismissed = [];
 				break;
 			case "undo":
-				if (!dismissed[0]) Spicetify.showNotification("취소할 항목이 없습니다", true);
+				if (!dismissed[0]) Spicetify.showNotification("되돌릴 항목이 없습니다", true);
 				else Spicetify.showNotification("최근에 숨긴 항목을 불러왔습니다");
 				dismissed.pop();
 				break;
