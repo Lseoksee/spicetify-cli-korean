@@ -115,7 +115,11 @@ const Spicetify = {
             "RemoteConfigResolver",
             "Playbar",
             "Tippy",
-            "_getStyledClassName"
+            "_getStyledClassName",
+            "GraphQL",
+            "ReactHook",
+            "_sidebarItemXToClone",
+            "AppTitle"
         ];
 
         const PLAYER_METHOD = [
@@ -171,6 +175,10 @@ const Spicetify = {
             "ConfirmDialog",
         ]
 
+        const REACT_HOOK = [
+            "DragHandler"
+        ]
+
         let count = SPICETIFY_METHOD.length;
         SPICETIFY_METHOD.forEach((method) => {
             if (Spicetify[method] === undefined || Spicetify[method] === null) {
@@ -198,6 +206,15 @@ const Spicetify = {
         })
         console.log(`${count}/${REACT_COMPONENT.length} Spicetify.ReactComponent methods and objects are OK.`)
 
+        count = REACT_HOOK.length;
+        REACT_HOOK.forEach((method) => {
+            if (Spicetify.ReactHook[method] === undefined || Spicetify.ReactHook[method] === null) {
+                console.error(`Spicetify.ReactHook.${method} is not available. Please open an issue in the Spicetify repository to inform us about it.`)
+                count--;
+            }
+        })
+        console.log(`${count}/${REACT_HOOK.length} Spicetify.ReactHook methods and objects are OK.`)
+
         Object.keys(Spicetify).forEach(key => {
             if(!SPICETIFY_METHOD.includes(key)) {
                 console.log(`Spicetify method ${key} exists but is not in the method list. Consider adding it.`)
@@ -215,14 +232,31 @@ const Spicetify = {
                 console.log(`Spicetify.ReactComponent method ${key} exists but is not in the method list. Consider adding it.`)
             }
         })
+
+        Object.keys(Spicetify.ReactHook).forEach(key => {
+            if(!REACT_HOOK.includes(key)) {
+                console.log(`Spicetify.ReactHook method ${key} exists but is not in the method list. Consider adding it.`)
+            }
+        })
     },
     GraphQL: {
         get Request() {
-            if (!Spicetify.GraphQL.Handler || !Spicetify.GraphQL.Context) return null;
-            return Spicetify.GraphQL.Handler(Spicetify.GraphQL.Context);
+            return Spicetify.Platform?.GraphQLLoader || Spicetify.GraphQL.Handler?.(Spicetify.GraphQL.Context);
         },
-        Definitions: {}
-    }
+        Definitions: {},
+        get QueryDefinitions() {
+            return Object.fromEntries(Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) => value.definitions.some(def => def.kind === "OperationDefinition" && def.operation === "query")));
+        },
+        get MutationDefinitions() {
+            return Object.fromEntries(Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) => value.definitions.some(def => def.kind === "OperationDefinition" && def.operation === "mutation")));
+        },
+        get ResponseDefinitions() {
+            return Object.fromEntries(Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) => value.definitions.every(def => def.kind !== "OperationDefinition")));
+        },
+    },
+    ReactComponent: {},
+    ReactHook: {},
+    URI: {},
 };
 
 // Wait for Spicetify.Player.origin._state before adding following APIs
@@ -275,7 +309,6 @@ Spicetify.getAudioData = async (uri) => {
     return await Spicetify.CosmosAsync.get(`wg://audio-attributes/v1/audio-analysis/${uriObj.getBase62Id?.() ?? uriObj.id}?format=json`);
 }
 
-if (!Spicetify.URI) Spicetify.URI = {};
 (function appendValidationFunc() {
     if (!Spicetify.URI.Type) {
         setTimeout(appendValidationFunc, 10);
@@ -1263,8 +1296,6 @@ class _HTMLGenericModal extends HTMLElement {
 customElements.define("generic-modal", _HTMLGenericModal);
 Spicetify.PopupModal = new _HTMLGenericModal();
 
-Spicetify.ReactComponent = {};
-
 Object.defineProperty(Spicetify, "TippyProps", {
     value: {
         delay: [200, 0],
@@ -1320,7 +1351,6 @@ Spicetify.Topbar = (function() {
             this.disabled = disabled;
             this.tippy = Spicetify.Tippy?.(this.element, {
                 content: label,
-                placement: "bottom",
                 ...Spicetify.TippyProps,
             });
             this.label = label;
@@ -1395,7 +1425,7 @@ Spicetify.Playbar = (function() {
     const buttonsStash = new Set();
 
     class Button {
-        constructor(label, icon, onClick, disabled = false, active = false, registerOnCreate = true) {
+        constructor(label, icon, onClick = () => {}, disabled = false, active = false, registerOnCreate = true) {
             this.element = document.createElement("button");
             this.element.classList.add("main-genericButton-button");
             this.element.style.display = "block";
@@ -1403,11 +1433,7 @@ Spicetify.Playbar = (function() {
             this.onClick = onClick;
             this.disabled = disabled;
             this.active = active;
-            Array.from(sibling?.classList ?? []).forEach((className) => {
-                if (!className.startsWith("main-genericButton")) {
-                    this.element.classList.add(className);
-                }
-            });
+            addClassname(this.element);
             this.tippy = Spicetify.Tippy?.(this.element, {
                 content: label,
                 ...Spicetify.TippyProps,
@@ -1447,7 +1473,7 @@ Spicetify.Playbar = (function() {
         get active() { return this._active; }
         register() {
             buttonsStash.add(this.element);
-            rightContainer?.prepend(...buttonsStash);
+            rightContainer?.prepend(this.element);
         }
         deregister() {
             buttonsStash.delete(this.element);
@@ -1456,23 +1482,112 @@ Spicetify.Playbar = (function() {
     }
 
     (function waitForPlaybarMounted() {
-        sibling = document.querySelector(".main-nowPlayingBar-right .main-genericButton-button");
         rightContainer = document.querySelector(".main-nowPlayingBar-right > div");
         if (!rightContainer) {
             setTimeout(waitForPlaybarMounted, 300);
             return;
         }
-        Array.from(sibling?.classList ?? []).forEach((className) => {
-            if (!className.startsWith("main-genericButton")) {
-                buttonsStash.forEach((button) => {
-                    button.classList.add(className);
-                });
-            }
-        });
+        buttonsStash.forEach((button) => addClassname(button));
         rightContainer.prepend(...buttonsStash);
     })();
 
-    return { Button };
+    function addClassname(element) {
+        sibling = document.querySelector(".main-nowPlayingBar-right .main-genericButton-button");
+        if (!sibling) {
+            setTimeout(addClassname, 300, element);
+            return;
+        }
+        Array.from(sibling.classList).forEach((className) => {
+            if (!className.startsWith("main-genericButton")) element.classList.add(className);
+        });
+    }
+
+    const widgetStash = new Set();
+    let nowPlayingWidget;
+
+    class Widget {
+        constructor(label, icon, onClick = () => {}, disabled = false, active = false, registerOnCreate = true) {
+            this.element = document.createElement("button");
+            this.element.classList.add("main-addButton-button");
+            this.icon = icon;
+            this.onClick = onClick;
+            this.disabled = disabled;
+            this.active = active;
+            this.tippy = Spicetify.Tippy?.(this.element, {
+                content: label,
+                ...Spicetify.TippyProps,
+            });
+            this.label = label;
+            registerOnCreate && this.register();
+        }
+        get label() { return this._label; }
+        set label(text) {
+            this._label = text;
+            if (!this.tippy) this.element.setAttribute("title", text);
+            else this.tippy.setContent(text);
+        }
+        get icon() { return this._icon; }
+        set icon(input) {
+            if (input && Spicetify.SVGIcons[input]) {
+                input = `<svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor">${Spicetify.SVGIcons[input]}</svg>`;
+            }
+            this._icon = input;
+            this.element.innerHTML = input;
+        }
+        get onClick() { return this._onClick; }
+        set onClick(func) {
+            this._onClick = func;
+            this.element.onclick = () => this._onClick(this);
+        }
+        get disabled() { return this._disabled; }
+        set disabled(bool) {
+            this._disabled = bool;
+            this.element.disabled = bool;
+            this.element.classList.toggle("main-addButton-disabled", bool);
+        }
+        set active(bool) {
+            this._active = bool;
+            this.element.classList.toggle("main-addButton-active", bool);
+        }
+        get active() { return this._active; }
+        register() {
+            widgetStash.add(this.element);
+            nowPlayingWidget?.append(this.element);
+        }
+        deregister() {
+            widgetStash.delete(this.element);
+            this.element.remove();
+        }
+    }
+
+    function waitForWidgetMounted() {
+        nowPlayingWidget = document.querySelector(".main-nowPlayingWidget-nowPlaying");
+        if (!nowPlayingWidget) {
+            setTimeout(waitForWidgetMounted, 300);
+            return;
+        }
+        nowPlayingWidget.append(...widgetStash);
+    };
+
+    (function attachObserver() {
+        const leftPlayer = document.querySelector(".main-nowPlayingBar-left");
+        if (!leftPlayer) {
+            setTimeout(attachObserver, 300);
+            return;
+        }
+        waitForWidgetMounted();
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.removedNodes.length > 0) {
+                    nowPlayingWidget = null;
+                    waitForWidgetMounted();
+                }
+            });
+        });
+        observer.observe(leftPlayer, {childList: true});
+    })();
+
+    return { Button, Widget };
 })();
 
 (function waitForHistoryAPI() {
@@ -1633,7 +1748,7 @@ Spicetify.Playbar = (function() {
             );
         }
     } catch (err) {
-        console.err(err);
+        console.error(err);
     }
 })();
 

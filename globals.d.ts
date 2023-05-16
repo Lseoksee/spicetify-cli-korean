@@ -1108,11 +1108,30 @@ declare namespace Spicetify {
      * Add button in player controls
      */
     namespace Playbar {
+        /**
+         * Create a button on the right side of the playbar
+         */
         class Button {
-            constructor(label: string, icon: Icon | string, onClick: (self: Button) => void, disabled?: boolean, active?: boolean, registerOnCreate?: boolean);
+            constructor(label: string, icon: Icon | string, onClick?: (self: Button) => void, disabled?: boolean, active?: boolean, registerOnCreate?: boolean);
             label: string;
             icon: string;
             onClick: (self: Button) => void;
+            disabled: boolean;
+            active: boolean;
+            element: HTMLButtonElement;
+            tippy: any;
+            register: () => void;
+            deregister: () => void;
+        }
+
+        /**
+         * Create a widget next to track info
+         */
+        class Widget {
+            constructor(label: string, icon: Icon | string, onClick?: (self: Widget) => void, disabled?: boolean, active?: boolean, registerOnCreate?: boolean);
+            label: string;
+            icon: string;
+            onClick: (self: Widget) => void;
             disabled: boolean;
             active: boolean;
             element: HTMLButtonElement;
@@ -1195,9 +1214,21 @@ declare namespace Spicetify {
          */
         type Query = "decorateItemsForEnhance" | "imageURLAndSize" | "imageSources" | "audioItems" | "creator" | "extractedColors" | "extractedColorsAndImageSources" | "fetchExtractedColorAndImageForAlbumEntity" | "fetchExtractedColorAndImageForArtistEntity" | "fetchExtractedColorAndImageForEpisodeEntity" | "fetchExtractedColorAndImageForPlaylistEntity" | "fetchExtractedColorAndImageForPodcastEntity" | "fetchExtractedColorAndImageForTrackEntity" | "fetchExtractedColorForAlbumEntity" | "fetchExtractedColorForArtistEntity" | "fetchExtractedColorForEpisodeEntity" | "fetchExtractedColorForPlaylistEntity" | "fetchExtractedColorForPodcastEntity" | "fetchExtractedColorForTrackEntity" | "getAlbumNameAndTracks" | "getEpisodeName" | "getTrackName" | "queryAlbumTrackUris" | "queryTrackArtists" | "decorateContextEpisodesOrChapters" | "decorateContextTracks" | "fetchTracksForRadioStation" | "decoratePlaylists" | "addToLibrary" | "removeFromLibrary" | "pinLibraryItem" | "unpinLibraryItem" | "fetchLibraryAlbums" | "areAlbumsInLibrary" | "fetchLibraryArtists" | "areArtistsInLibrary" | "fetchLibraryTracks" | "areTracksInLibrary" | "fetchLibraryShows" | "areShowsInLibrary" | "fetchLibraryAudiobooks" | "fetchLibraryEpisodes" | "areEpisodesInLibrary" | "libraryV2" | "playlistUser" | "FetchPlaylistMetadata" | "playlistContentsItemTrackArtist" | "playlistContentsItemTrackAlbum" | "playlistContentsItemTrack" | "playlistContentsItemLocalTrack" | "playlistContentsItemEpisodeShow" | "playlistContentsItemEpisode" | "playlistContentsItemResponse" | "playlistContentsItem" | "FetchPlaylistContents" | "fetchPlaylist" | "fetchPlaylistMetadata" | "fetchPlaylistContents" | "addToPlaylist" | "removeFromPlaylist" | "moveItemsInPlaylist" | "fetchEntitiesForRecentlyPlayed" | "queryShowAccessInfo" | "episodeTrailerUri" | "podcastEpisode" | "podcastMetadataV2" | "minimalAudiobook" | "audiobookChapter" | "audiobookMetadataV2" | "queryShowMetadataV2" | "queryBookChapters" | "getEpisodeOrChapter" | "queryPodcastEpisodes" | "fetchExtractedColors" | "queryFullscreenMode" | "queryNpvEpisode" | "queryNpvArtist" | "albumTrack" | "getAlbum" | "queryAlbumTracks" | "queryArtistOverview" | "queryArtistAppearsOn" | "discographyAlbum" | "albumMetadataReleases" | "albumMetadata" | "queryArtistDiscographyAlbums" | "queryArtistDiscographySingles" | "queryArtistDiscographyCompilations" | "queryArtistDiscographyAll" | "queryArtistDiscographyOverview" | "artistPlaylist" | "queryArtistPlaylists" | "queryArtistDiscoveredOn" | "queryArtistFeaturing" | "queryArtistRelated" | "queryArtistMinimal" | "searchModalResults" | "queryWhatsNewFeed" | "whatsNewFeedNewItems" | "SetItemsStateInWhatsNewFeed" | "browseImageURLAndSize" | "browseImageSources" | "browseAlbum" | "browseArtist" | "browseEpisode" | "browseChapter" | "browsePlaylist" | "browsePodcast" | "browseAudiobook" | "browseTrack" | "browseUser" | "browseMerch" | "browseArtistConcerts" | "browseContent" | "browseSectionContainer" | "browseClientFeature" | "browseItem" | "browseAll";
         /**
-         * GraphQL query definitions.
+         * Collection of GraphQL definitions.
          */
         const Definitions: Record<Query | string, any>;
+        /**
+         * GraphQL query definitions. Subset of `Definitions` that are used as query requests.
+         */
+        const QueryDefinitions: Record<Query | string, any>;
+        /**
+         * GraphQL mutation definitions. Subset of `Definitions` that are used as mutation requests.
+         */
+        const MutationDefinitions: Record<Query | string, any>;
+        /**
+         * GraphQL response definitions. Subset of `Definitions` that are used as response types.
+         */
+        const ResponseDefinitions: Record<Query | string, any>;
         /**
          * Sends a GraphQL query to Spotify.
          * @description A preinitialized version of `Spicetify.GraphQL.Handler` using current context.
@@ -1210,12 +1241,33 @@ declare namespace Spicetify {
          * Context for GraphQL queries.
          * @description Used to set context for the handler and initialze it.
          */
-        const Context: Record<string | any>;
+        const Context: Record<string, any>;
         /**
          * Handler for GraphQL queries.
          * @param context Context to use
          * @return Function to handle GraphQL queries
          */
-        function Handler(context: Record<string | any>): (query: string, variables?: Record<string, any>) => Promise<any>;
+        function Handler(context: Record<string, any>): (query: string, variables?: Record<string, any>) => Promise<any>;
+    }
+
+    namespace ReactHook {
+        /**
+         * React Hook to create interactive drag-and-drop element
+         * @description Used to create a draggable element that can be dropped into Spotify's components (e.g. Playlist, Folder, Sidebar, Queue)
+         * @param uris List of URIs to be dragged
+         * @param label Label to be displayed when dragging
+         * @param contextUri Context URI of the element from which the drag originated (e.g. Playlist URI)
+         * @param sectionIndex Index of the section in which the drag originated
+         * @param dropOriginUri URI of the desired drop target. Leave empty to allow drop anywhere
+         * @return Function to handle drag event. Should be passed to `onDragStart` prop of the element. All parameters passed onto the hook will be passed onto the handler unless declared otherwise.
+         *
+         */
+        function DragHandler(
+            uris?: string[],
+            label?: string,
+            contextUri?: string,
+            sectionIndex?: number,
+            dropOriginUri?: string
+        ): (event: React.DragEvent, uris?: string[], label?: string, contextUri?: string, sectionIndex?: number) => void;
     }
 }

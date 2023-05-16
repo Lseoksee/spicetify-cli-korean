@@ -132,7 +132,7 @@ body.video-full-screen.video-full-screen--hide-ui {
     color: currentColor;
     padding: 0 5px;
 }
-#fad-artist svg, #fad-album svg {
+#fad-artist svg, #fad-album svg, #fad-release-date svg {
     display: inline-block;
 }
 ::-webkit-scrollbar {
@@ -161,11 +161,11 @@ body.video-full-screen.video-full-screen--hide-ui {
     font-size: 87px;
     font-weight: var(--glue-font-weight-black);
 }
-#fad-artist, #fad-album {
+#fad-artist, #fad-album, #fad-release-date {
     font-size: 54px;
     font-weight: var(--glue-font-weight-medium);
 }
-#fad-artist svg, #fad-album svg {
+#fad-artist svg, #fad-album svg, #fad-release-date svg {
     margin-right: 5px;
 }
 #fad-status {
@@ -203,11 +203,11 @@ body.video-full-screen.video-full-screen--hide-ui {
     font-size: 54px;
     font-weight: var(--glue-font-weight-black);
 }
-#fad-artist, #fad-album {
+#fad-artist, #fad-album, #fad-release-date {
     font-size: 33px;
     font-weight: var(--glue-font-weight-medium);
 }
-#fad-artist svg, #fad-album svg {
+#fad-artist svg, #fad-album svg, #fad-release-date svg {
     width: 25px;
     height: 25px;
     margin-right: 5px;
@@ -351,6 +351,7 @@ body.video-full-screen.video-full-screen--hide-ui {
 				title: "",
 				artist: "",
 				album: "",
+				releaseDate: "",
 				cover: "",
 				heart: Spicetify.Player.getHeart()
 			};
@@ -365,9 +366,11 @@ body.video-full-screen.video-full-screen--hide-ui {
 			const albumInfo = await Spicetify.CosmosAsync.get(`https://api.spotify.com/v1/albums/${id}`);
 
 			const albumDate = new Date(albumInfo.release_date);
-			const recentDate = new Date();
-			recentDate.setMonth(recentDate.getMonth() - 6);
-			return albumDate.toLocaleString("default", albumDate > recentDate ? { year: "numeric", month: "short", day: "numeric" } : { year: "numeric" });
+			return albumDate.toLocaleString("default", {
+				year: "numeric",
+				month: "short",
+				day: "numeric"
+			});
 		}
 
 		async fetchInfo() {
@@ -396,20 +399,24 @@ body.video-full-screen.video-full-screen--hide-ui {
 				artistName = meta.artist_name;
 			}
 
-			// prepare album
-			let albumText = meta.album_title || "";
-			if (CONFIG.showAlbum) {
+			// prepare release date
+			let releaseDate;
+			if (CONFIG.showReleaseDate) {
 				const albumURI = meta.album_uri;
 				if (albumURI?.startsWith("spotify:album:")) {
-					albumText += " • " + (await this.getAlbumDate(albumURI));
+					releaseDate = await this.getAlbumDate(albumURI);
 				}
 			}
+
+			// prepare album
+			let albumText = meta.album_title || "";
 
 			if (meta.image_xlarge_url === this.currTrackImg.src) {
 				this.setState({
 					title: rawTitle || "",
 					artist: artistName || "",
-					album: albumText || ""
+					album: albumText || "",
+					releaseDate: releaseDate || ""
 				});
 				return;
 			}
@@ -426,6 +433,7 @@ body.video-full-screen.video-full-screen--hide-ui {
 					title: rawTitle || "",
 					artist: artistName || "",
 					album: albumText || "",
+					releaseDate: releaseDate || "",
 					cover: bgImage
 				});
 			};
@@ -610,6 +618,12 @@ body.video-full-screen.video-full-screen--hide-ui {
 									text: this.state.album,
 									icon: Spicetify.SVGIcons.album
 								}),
+							CONFIG.showReleaseDate &&
+								react.createElement(SubInfo, {
+									id: "fad-release-date",
+									text: this.state.releaseDate,
+									icon: Spicetify.SVGIcons.clock
+								}),
 							react.createElement(
 								"div",
 								{
@@ -741,7 +755,10 @@ body.video-full-screen.video-full-screen--hide-ui {
 							func();
 						}
 					},
-					react.createElement(DisplayIcon, { icon: Spicetify.SVGIcons.check, size: 16 })
+					react.createElement(DisplayIcon, {
+						icon: Spicetify.SVGIcons.check,
+						size: 16
+					})
 				)
 			)
 		);
@@ -801,15 +818,56 @@ button.switch[disabled] {
 				},
 				disabled: !checkLyricsPlus()
 			}),
-			react.createElement(ConfigItem, { name: "재생바 표시", field: "enableProgress", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "재생 컨트롤러 표시", field: "enableControl", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "제목 간추리기", field: "trimTitle", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "앨범 제목 표시", field: "showAlbum", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "모든 아티스트 표시", field: "showAllArtists", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "아티스트 아이콘 표시", field: "icons", func: updateVisual }),
-			react.createElement(ConfigItem, { name: "수직 모드", field: "vertical", func: updateStyle }),
-			react.createElement(ConfigItem, { name: "완전한 전체화면", field: "enableFullscreen", func: toggleFullscreen }),
-			react.createElement(ConfigItem, { name: "부드러운 곡전환", field: "enableFade", func: updateVisual })
+			react.createElement(ConfigItem, {
+				name: "재생바 표시",
+				field: "enableProgress",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "재생 컨트롤러 표시",
+				field: "enableControl",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "제목 간추리기",
+				field: "trimTitle",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "앨범 제목 표시",
+				field: "showAlbum",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "모든 아티스트 표시",
+				field: "showAllArtists",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "발매 날짜 표시",
+				field: "showReleaseDate",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "아티스트 아이콘 표시",
+				field: "icons",
+				func: updateVisual
+			}),
+			react.createElement(ConfigItem, {
+				name: "수직 모드",
+				field: "vertical",
+				func: updateStyle
+			}),
+			react.createElement(ConfigItem, {
+				name: "완전한 전체화면",
+				field: "enableFullscreen",
+				func: toggleFullscreen
+			}),
+			react.createElement(ConfigItem, {
+				name: "부드러운 곡전환",
+				field: "enableFade",
+				func: updateVisual
+			})
 		);
 		Spicetify.PopupModal.display({
 			title: "Full App Display",

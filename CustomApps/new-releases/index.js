@@ -96,15 +96,16 @@ class Grid extends react.Component {
 				react.createElement(
 					"div",
 					{
-						className: "main-gridContainer-gridContainer main-gridContainer-fixedWidth",
+						className: "main-gridContainer-gridContainer ",
 						style: {
-							"--minimumColumnWidth": "180px",
-							"--column-width": "minmax(var(--minimumColumnWidth),1fr)",
+							"--min-container-width": "180px",
 							"--column-count": "auto-fill",
-							"--grid-gap": "24px"
+							"--grid-gap": "18px"
 						}
 					},
-					separatedByDate[date].map(card => !dismissed.includes(card.props.uri) && react.createElement(Card, card.props))
+					separatedByDate[date]
+						.filter(card => !dismissed.includes(card.props.uri))
+						.map(card => react.createElement(Card, { ...card.props, key: card.props.uri }))
 				)
 			);
 		}
@@ -172,7 +173,7 @@ class Grid extends react.Component {
 				dateList.push(dateStr);
 				separatedByDate[dateStr] = [];
 			}
-			separatedByDate[dateStr].push(react.createElement(Card, track));
+			separatedByDate[dateStr].push(react.createElement(Card, { ...track, key: track.uri }));
 		}
 
 		for (const date of dateList) {
@@ -189,12 +190,11 @@ class Grid extends react.Component {
 				react.createElement(
 					"div",
 					{
-						className: "main-gridContainer-gridContainer main-gridContainer-fixedWidth",
+						className: "main-gridContainer-gridContainer",
 						style: {
-							"--minimumColumnWidth": "180px",
-							"--column-width": "minmax(var(--minimumColumnWidth),1fr)",
+							"--min-container-width": "180px",
 							"--column-count": "auto-fill",
-							"--grid-gap": "24px"
+							"--grid-gap": "18px"
 						}
 					},
 					separatedByDate[date].filter(card => !dismissed.includes(card.props.uri))
