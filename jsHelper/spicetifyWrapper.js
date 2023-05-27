@@ -322,7 +322,12 @@ Spicetify.getAudioData = async (uri) => {
             .map((word) => word[0].toUpperCase() + word.slice(1))
             .join("");
         Spicetify.URI[`is${funcName}`] = (uri) => {
-            const uriObj = Spicetify.URI.from?.(uri) ?? Spicetify.URI.fromString?.(uri);
+            let uriObj;
+            try {
+                uriObj = Spicetify.URI.from?.(uri) ?? Spicetify.URI.fromString?.(uri);
+            } catch {
+                return false;
+            }
             if (!uriObj) return false;
             return uriObj.type === Spicetify.URI.Type[type];
         };
@@ -1508,7 +1513,7 @@ Spicetify.Playbar = (function() {
     class Widget {
         constructor(label, icon, onClick = () => {}, disabled = false, active = false, registerOnCreate = true) {
             this.element = document.createElement("button");
-            this.element.classList.add("main-addButton-button");
+            this.element.className = "main-addButton-button control-button control-button-heart";
             this.icon = icon;
             this.onClick = onClick;
             this.disabled = disabled;
@@ -1544,10 +1549,12 @@ Spicetify.Playbar = (function() {
             this._disabled = bool;
             this.element.disabled = bool;
             this.element.classList.toggle("main-addButton-disabled", bool);
+            this.element.ariaDisabled = bool;
         }
         set active(bool) {
             this._active = bool;
             this.element.classList.toggle("main-addButton-active", bool);
+            this.element.ariaChecked = bool;
         }
         get active() { return this._active; }
         register() {
