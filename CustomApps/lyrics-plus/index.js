@@ -84,7 +84,7 @@ const CONFIG = {
 		},
 		local: {
 			on: getConfig("lyrics-plus:provider:local:on"),
-			desc: `이전 Spotify 세션에서 저장한가사/로컬파일 가사를 불러옵니다. `,
+			desc: `이전 Spotify 세션에서 저장한가사/로컬파일 가사를 불러옵니다.`,
 			modes: [KARAOKE, SYNCED, UNSYNCED]
 		}
 	},
