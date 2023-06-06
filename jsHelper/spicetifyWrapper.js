@@ -1766,8 +1766,11 @@ Spicetify.Playbar = (function() {
     // Fetch latest version from GitHub
     try {
         const res = await fetch("https://api.github.com/repos/spicetify/spicetify-cli/releases/latest");
+        const korres = await fetch("https://api.github.com/repos/Lseoksee/spicetify-cli-korean/releases/latest");
         const { tag_name, html_url, body } = await res.json();
+        const korjson = await korres.json();
         const semver = tag_name.slice(1);
+        const korver = korjson.tag_name.slice(1);
         const changelogRawData = body.match(/## What's Changed([\s\S]*?)\r\n\r/)[1]
         const changelog = [...changelogRawData.matchAll(/\r\n\*\s(.+?)\sin\shttps/g)]
         .map(match => {
@@ -1836,6 +1839,20 @@ Spicetify.Playbar = (function() {
                 </details>
             `;
 
+            if (semver === korver) {
+                content.innerHTML+= `
+                    <hr>
+                    <h3>spicetify-korean가 업데이트 되었습니다.</h3>
+                    <a href="${korjson.html_url}" target="_blank" rel="noopener noreferrer">
+                        업데이트 하러가기
+                    </a>
+                `
+            } else {
+                content.innerHTML+= `
+                    <h3>spicetify-korean가 아직 업데이트 되지 않았습니다.</h3>
+                `
+            }
+            
             (function waitForTippy() {
                 if (!Spicetify.Tippy) {
                     setTimeout(waitForTippy, 300);
