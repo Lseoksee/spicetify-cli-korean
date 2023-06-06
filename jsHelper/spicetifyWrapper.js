@@ -1765,7 +1765,7 @@ Spicetify.Playbar = (function() {
     }
     // Fetch latest version from GitHub
     try {
-        const res = await fetch("https://api.github.com/repos/Lseoksee/spicetify-cli-korean/releases/latest");
+        const res = await fetch("https://api.github.com/repos/spicetify/spicetify-cli/releases/latest");
         const { tag_name, html_url, body } = await res.json();
         const semver = tag_name.slice(1);
         const changelogRawData = body.match(/## What's Changed([\s\S]*?)\r\n\r/)[1]
