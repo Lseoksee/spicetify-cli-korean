@@ -1,3 +1,4 @@
+
 const Spicetify = {
     get CosmosAsync() {return Spicetify.Player.origin?._cosmos},
     get Queue() {return Spicetify.Player.origin?._queue?._state ?? Spicetify.Player.origin?._queue?._queue},
@@ -121,7 +122,9 @@ const Spicetify = {
             "_sidebarXItemToClone",
             "AppTitle",
             "_reservedPanelIds",
-            "Panel"
+            "Panel",
+            "ReactFlipToolkit",
+            "classnames",
         ];
 
         const PLAYER_METHOD = [
@@ -261,8 +264,23 @@ const Spicetify = {
     },
     ReactComponent: {},
     ReactHook: {},
+    ReactFlipToolkit: {},
     URI: {},
 };
+
+(function hotloadWebpackModules() {
+    if (!window?.webpackChunkopen) {
+        setTimeout(hotloadWebpackModules, 50);
+        return;
+    }
+    // Force all webpack modules to load
+    const require = webpackChunkopen.push([[Symbol()], {}, re => re]);
+    const modules = Object.keys(require.m).map(id => require(id));
+
+    // classnames
+    // https://github.com/JedWatson/classnames/
+    Spicetify.classnames = modules.filter(module => typeof module === "function").find(module => module.toString().includes('"string"') && module.toString().includes("[native code]"));
+})();
 
 // Wait for Spicetify.Player.origin._state before adding following APIs
 (function waitOrigins() {
@@ -1350,12 +1368,13 @@ Object.defineProperty(Spicetify, "TippyProps", {
 
 Spicetify.Topbar = (function() {
     let leftContainer;
-    const buttonsStash = new Set();
+    let rightContainer;
+    const leftButtonsStash = new Set();
+    const rightButtonsStash = new Set();
 
     class Button {
-        constructor(label, icon, onClick, disabled = false) {
+        constructor(label, icon, onClick, disabled = false, isRight = false) {
             this.element = document.createElement("button");
-            this.element.classList.add("main-topBar-button");
             this.icon = icon;
             this.onClick = onClick;
             this.disabled = disabled;
@@ -1364,8 +1383,16 @@ Spicetify.Topbar = (function() {
                 ...Spicetify.TippyProps,
             });
             this.label = label;
-            buttonsStash.add(this.element);
-            leftContainer?.append(...buttonsStash);
+
+            if (isRight) {
+                this.element.classList.add('encore-over-media-set', 'main-topBar-buddyFeed');
+                rightButtonsStash.add(this.element);
+                rightContainer?.after(this.element);
+            } else {
+                this.element.classList.add('main-topBar-button');
+                leftButtonsStash.add(this.element);
+                leftContainer?.append(this.element)
+            }
         }
         get label() { return this._label; }
         set label(text) {
@@ -1390,21 +1417,19 @@ Spicetify.Topbar = (function() {
         set disabled(bool) {
             this._disabled = bool;
             this.element.disabled = bool;
-            if (bool) {
-                this.element.classList.add("disabled");
-            } else {
-                this.element.classList.remove("disabled");
-            }
+            this.element.classList.toggle("disabled", bool);
         }
     }
 
     function waitForTopbarMounted() {
         leftContainer = document.querySelector(".main-topBar-historyButtons");
-        if (!leftContainer) {
+        rightContainer = document.querySelector(".main-noConnection");
+        if (!leftContainer || !rightContainer) {
             setTimeout(waitForTopbarMounted, 300);
             return;
         }
-        leftContainer.append(...buttonsStash);
+        leftContainer.append(...leftButtonsStash);
+        rightContainer.after(...rightButtonsStash);
     };
 
     waitForTopbarMounted();
@@ -1419,6 +1444,7 @@ Spicetify.Topbar = (function() {
             mutations.forEach((mutation) => {
                 if (mutation.removedNodes.length > 0) {
                     leftContainer = null;
+                    rightContainer = null;
                     waitForTopbarMounted();
                 }
             });
@@ -1646,7 +1672,8 @@ Spicetify.Playbar = (function() {
             return false;
           }
 
-          return this.props.children;
+          // Pass the `panel` prop with the current panel ID to the children
+          return Spicetify.React.cloneElement(this.props.children, { panel: this.props.id });
         }
     }
 
@@ -1676,7 +1703,7 @@ Spicetify.Playbar = (function() {
             const content = isCustom
                 ? children
                 : Spicetify.React.createElement(
-                    Spicetify.ReactComponent.PanelSkeleton ?? "aside",
+                    Spicetify.ReactComponent.PanelSkeleton,
                     {
                         label,
                         // Backwards compatibility, no longer needed in Spotify 1.2.12
@@ -1684,11 +1711,11 @@ Spicetify.Playbar = (function() {
                         style,
                     },
                     Spicetify.React.createElement(
-                        Spicetify.ReactComponent.PanelContent ?? "div",
+                        Spicetify.ReactComponent.PanelContent,
                         {
                             className: wrapperClassname,
                         },
-                        Spicetify.React.createElement(Spicetify.ReactComponent.PanelHeader ?? "div", {
+                        Spicetify.React.createElement(Spicetify.ReactComponent.PanelHeader, {
                             title: label,
                             panel: id,
                             link: headerLink,
@@ -1700,7 +1727,7 @@ Spicetify.Playbar = (function() {
                             titleVariant: headerVariant,
                             titleSemanticColor: headerSemanticColor,
                         }),
-                        children
+                        Spicetify.React.cloneElement(children, { panel: id })
                     )
                 )
 
