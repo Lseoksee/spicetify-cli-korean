@@ -522,8 +522,8 @@ function openConfig() {
 					when: () => !CONFIG.visual["colorful"]
 				},
 				{
-					desc: "텍스트 변환: 중국어-일본어 감지 임계값(고급)",
-					info: "한자/일어한자 또는 가나가 가사에서 우세할 때마다 확인합니다. 결과가 임계값을 통과하면 일본어일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
+					desc: "텍스트 변환: 일본어 감지 임계값(고급)",
+					info: "일본어가 가사에서 빈도가 높은지 확인합니다. 결과가 임계값을 통과하면 일본어일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
 					key: "ja-detect-threshold",
 					type: ConfigAdjust,
 					min: thresholdSizeLimit.min,
@@ -532,7 +532,7 @@ function openConfig() {
 				},
 				{
 					desc: "텍스트 변환: 번체-간체 감지 임계값(고급)",
-					info: "가사에서 번체 또는 간체가 우세한지 확인합니다. 결과가 임계값을 통과하면 간체일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
+					info: "가사에서 번체 또는 간체가 빈도가 높은지 확인합니다. 결과가 임계값을 통과하면 간체일 가능성이 높으며 그 반대의 경우도 마찬가지입니다. 이 설정은 백분율입니다.",
 					key: "hans-detect-threshold",
 					type: ConfigAdjust,
 					min: thresholdSizeLimit.min,

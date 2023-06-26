@@ -91,11 +91,30 @@ const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, h
 
 	let translator = new Translator();
 
-	let menuOptions = null;
+	let sourceOptions = {
+		none: "없음"
+	};
+
+	const languageOptions = {
+		off: "기본값",
+		"zh-hans": "중국어 (간체)",
+		"zh-hant": "중국어 (번체)",
+		ja: "일본어",
+		ko: "한국어"
+	};
+
+	let modeOptions = {};
+
+	if (hasNeteaseTranslation) {
+		sourceOptions = {
+			...sourceOptions,
+			neteaseTranslation: "중국어 (Netease)"
+		};
+	}
 
 	switch (friendlyLanguage) {
 		case "japanese": {
-			menuOptions = {
+			modeOptions = {
 				furigana: "후리가나",
 				romaji: "로마자",
 				hiragana: "히라가나",
@@ -104,26 +123,20 @@ const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, h
 			break;
 		}
 		case "korean": {
-			menuOptions = {
+			modeOptions = {
 				hangul: "한글",
 				romaja: "로마자"
 			};
 			break;
 		}
 		case "chinese": {
-			menuOptions = {
+			modeOptions = {
 				cn: "중국어",
 				hk: "중국어 (홍콩)",
 				tw: "중국어 (대만)"
 			};
 			break;
 		}
-	}
-	if (hasNeteaseTranslation) {
-		menuOptions = {
-			...menuOptions,
-			neteaseTranslation: "Netease"
-		};
 	}
 
 	return react.createElement(
@@ -146,10 +159,24 @@ const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, h
 						react.createElement(OptionList, {
 							items: [
 								{
+									desc: "번역 제공자",
+									key: `translate:translated-lyrics-source`,
+									type: ConfigSelection,
+									options: sourceOptions,
+									renderInline: true
+								},
+								{
+									desc: "언어 바꾸기",
+									key: `translate:detect-language-override`,
+									type: ConfigSelection,
+									options: languageOptions,
+									renderInline: true
+								},
+								{
 									desc: "모드",
 									key: `translation-mode:${friendlyLanguage}`,
 									type: ConfigSelection,
-									options: menuOptions,
+									options: modeOptions,
 									renderInline: true
 								},
 								{
