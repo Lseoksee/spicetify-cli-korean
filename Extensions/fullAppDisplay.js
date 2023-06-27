@@ -408,7 +408,8 @@ body.video-full-screen.video-full-screen--hide-ui {
 			if (CONFIG.showReleaseDate) {
 				const albumURI = meta.album_uri;
 				if (albumURI?.startsWith("spotify:album:")) {
-					releaseDate = await this.getAlbumDate(albumURI);
+					const date = new Date(await this.getAlbumDate(albumURI));
+					releaseDate = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
 				}
 			}
 
