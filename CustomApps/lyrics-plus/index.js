@@ -90,7 +90,7 @@ const CONFIG = {
 		}
 	},
 	providersOrder: localStorage.getItem("lyrics-plus:services-order"),
-	modes: ["노래방", "실시간가사", "가사", "genius"],
+	modes: ["karaoke", "synced", "unsynced", "genius"],
 	locked: localStorage.getItem("lyrics-plus:lock-mode") || "-1"
 };
 
@@ -343,9 +343,7 @@ class LyricsContainer extends react.Component {
 	}
 
 	lyricsSource(mode) {
-		const remodes =  ["karaoke", "synced", "unsynced", "genius"];
-		//모드 추가시 추가할것
-		const lyricsState = this.state[remodes[mode]];
+		const lyricsState = this.state[CONFIG.modes[mode]];
 		if (!lyricsState) return;
 		this.state.currentLyrics = this.state[CONFIG.visual["translate:translated-lyrics-source"]] ?? lyricsState;
 	}

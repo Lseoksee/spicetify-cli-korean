@@ -109,8 +109,17 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 	const [availableSpace, setAvailableSpace] = useState(0);
 	const [droplistItem, setDroplistItems] = useState([]);
 
+	//상단바 한글화
+	const kormap = new Map([
+		["karaoke", "노래방"],
+		["synced", "실시간가사"],
+		["unsynced", "가사"],
+		["genius", "Genius"]
+	]);
+
 	const options = links.map(key => {
-		let value = key.replace(/./, c => c.toUpperCase());
+		//한글화 대응
+		let value = kormap.get(key) || key.replace(/./, c => c.toUpperCase());
 		if (key === lockLink) {
 			value = "• " + value;
 		}
