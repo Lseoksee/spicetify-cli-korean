@@ -448,6 +448,15 @@ class LyricsContainer extends react.Component {
 	}
 
 	saveLocalLyrics(uri, lyrics) {
+		if (lyrics.genius) {
+			lyrics.unsynced = lyrics.genius.split("<br>").map(lyc => {
+				return {
+					text: lyc.replace(/<[^>]*>/g, "")
+				};
+			});
+			lyrics.genius = null;
+		}
+
 		const localLyrics = JSON.parse(localStorage.getItem(`${APP_NAME}:local-lyrics`)) || {};
 		localLyrics[uri] = lyrics;
 		localStorage.setItem(`${APP_NAME}:local-lyrics`, JSON.stringify(localLyrics));
@@ -772,38 +781,37 @@ class LyricsContainer extends react.Component {
 					hasNeteaseTranslation
 				}),
 				react.createElement(AdjustmentsMenu, { mode }),
-				mode !== GENIUS &&
+				react.createElement(
+					Spicetify.ReactComponent.TooltipWrapper,
+					{
+						label: this.state.isCached ? "가사 저장됨" : "가사 저장하기"
+					},
 					react.createElement(
-						Spicetify.ReactComponent.TooltipWrapper,
+						"button",
 						{
-							label: this.state.isCached ? "가사 저장됨" : "가사 저장하기"
-						},
-						react.createElement(
-							"button",
-							{
-								className: "lyrics-config-button",
-								onClick: () => {
-									const { synced, unsynced, karaoke } = this.state;
-									if (!synced && !unsynced && !karaoke) {
-										Spicetify.showNotification("저장할 가사가 없습니다", true);
-										return;
-									}
+							className: "lyrics-config-button",
+							onClick: () => {
+								const { synced, unsynced, karaoke, genius } = this.state;
+								if (!synced && !unsynced && !karaoke && !genius) {
+									Spicetify.showNotification("저장할 가사가 없습니다", true);
+									return;
+								}
 
-									this.saveLocalLyrics(this.currentTrackUri, { synced, unsynced, karaoke });
-									Spicetify.showNotification("가사를 저장했습니다");
-								}
-							},
-							react.createElement("svg", {
-								width: 16,
-								height: 16,
-								viewBox: "0 0 16 16",
-								fill: "currentColor",
-								dangerouslySetInnerHTML: {
-									__html: Spicetify.SVGIcons[this.state.isCached ? "downloaded" : "download"]
-								}
-							})
-						)
-					),
+								this.saveLocalLyrics(this.currentTrackUri, { synced, unsynced, karaoke, genius });
+								Spicetify.showNotification("가사를 저장했습니다");
+							}
+						},
+						react.createElement("svg", {
+							width: 16,
+							height: 16,
+							viewBox: "0 0 16 16",
+							fill: "currentColor",
+							dangerouslySetInnerHTML: {
+								__html: Spicetify.SVGIcons[this.state.isCached ? "downloaded" : "download"]
+							}
+						})
+					)
+				),
 				react.createElement(
 					Spicetify.ReactComponent.TooltipWrapper,
 					{
