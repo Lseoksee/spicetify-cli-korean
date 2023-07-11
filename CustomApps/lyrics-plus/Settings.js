@@ -68,27 +68,27 @@ const CacheButton = () => {
 };
 
 const RefreshTokenButton = ({ setTokenCallback }) => {
-	const [buttonText, setButtonText] = useState("Refresh token");
+	const [buttonText, setButtonText] = useState("토큰 초기화");
 
 	useEffect(() => {
-		if (buttonText === "Refreshing token...") {
+		if (buttonText === "초기화중...") {
 			Spicetify.CosmosAsync.get(`https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0`, null, {
 				authority: "apic-desktop.musixmatch.com"
 			})
 				.then(({ message: response }) => {
 					if (response.header.status_code === 200 && response.body.user_token) {
 						setTokenCallback(response.body.user_token);
-						setButtonText("Token refreshed");
+						setButtonText("토큰이 초기화 됨");
 					} else if (response.header.status_code === 401) {
-						setButtonText("Too many attempts");
+						setButtonText("너무 많은 요청");
 					} else {
-						setButtonText("Failed to refresh token");
-						console.error("Failed to refresh token", response);
+						setButtonText("토큰 초기화 실패");
+						console.error("토큰 초기화 실패", response);
 					}
 				})
 				.catch(error => {
-					setButtonText("Failed to refresh token");
-					console.error("Failed to refresh token", error);
+					setButtonText("토큰 초기화 실패");
+					console.error("토큰 초기화 실패", error);
 				});
 		}
 	}, [buttonText]);
@@ -98,9 +98,9 @@ const RefreshTokenButton = ({ setTokenCallback }) => {
 		{
 			className: "btn",
 			onClick: () => {
-				setButtonText("Refreshing token...");
+				setButtonText("초기화중...");
 			},
-			disabled: buttonText !== "Refresh token"
+			disabled: buttonText !== "토큰 초기화"
 		},
 		buttonText
 	);
