@@ -86,58 +86,107 @@ const OptionsMenu = react.memo(({ options, onSelect, selected, defaultValue, bol
 	);
 });
 
-const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, hasNeteaseTranslation }) => {
-	if (!showTranslationButton) return null;
-
-	let translator = new Translator();
-
-	let sourceOptions = {
-		none: "없음"
-	};
-
-	const languageOptions = {
-		off: "기본값",
-		"zh-hans": "중국어 (간체)",
-		"zh-hant": "중국어 (번체)",
-		ja: "일본어",
-		ko: "한국어"
-	};
-
-	let modeOptions = {};
-
-	if (hasNeteaseTranslation) {
-		sourceOptions = {
-			...sourceOptions,
-			neteaseTranslation: "중국어 (Netease)"
+const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
+	const items = useMemo(() => {
+		let sourceOptions = {
+			none: "없음"
 		};
-	}
 
-	switch (friendlyLanguage) {
-		case "japanese": {
-			modeOptions = {
-				furigana: "후리가나",
-				romaji: "로마자",
-				hiragana: "히라가나",
-				katakana: "가타카나"
+		const languageOptions = {
+			off: "기본값",
+			"zh-hans": "중국어 (간체)",
+			"zh-hant": "중국어 (번체)",
+			ja: "일본어",
+			ko: "한국어"
+		};
+
+		let modeOptions = {};
+
+		if (hasTranslation.musixmatch) {
+			sourceOptions = {
+				...sourceOptions,
+				musixmatchTranslation: "영어 (Musixmatch)"
 			};
-			break;
 		}
-		case "korean": {
-			modeOptions = {
-				hangul: "한글",
-				romaja: "로마자"
+
+		if (hasTranslation.netease) {
+			sourceOptions = {
+				...sourceOptions,
+				neteaseTranslation: "중국어 (Netease)"
 			};
-			break;
 		}
-		case "chinese": {
-			modeOptions = {
-				cn: "중국어",
-				hk: "중국어 (홍콩)",
-				tw: "중국어 (대만)"
-			};
-			break;
+
+		switch (friendlyLanguage) {
+			case "japanese": {
+				modeOptions = {
+					furigana: "후리가나",
+					romaji: "로마자",
+					hiragana: "히라가나",
+					katakana: "가타카나"
+				};
+				break;
+			}
+			case "korean": {
+				modeOptions = {
+					hangul: "한글",
+					romaja: "로마자"
+				};
+				break;
+			}
+			case "chinese": {
+				modeOptions = {
+					cn: "중국어",
+					hk: "중국어 (홍콩)",
+					tw: "중국어 (대만)"
+				};
+				break;
+			}
 		}
-	}
+
+		return [
+			{
+				desc: "번역 제공자",
+				key: `translate:translated-lyrics-source`,
+				type: ConfigSelection,
+				options: sourceOptions,
+				renderInline: true
+			},
+			{
+				desc: "언어 바꾸기",
+				key: `translate:detect-language-override`,
+				type: ConfigSelection,
+				options: languageOptions,
+				renderInline: true
+			},
+			{
+				desc: "모드",
+				key: `translation-mode:${friendlyLanguage}`,
+				type: ConfigSelection,
+				options: modeOptions,
+				renderInline: true
+			},
+			{
+				desc: "변환하기",
+				key: "translate",
+				type: ConfigSlider,
+				trigger: "click",
+				action: "toggle",
+				renderInline: true
+			}
+		];
+	}, [friendlyLanguage]);
+
+	useEffect(() => {
+		// Currently opened Context Menu does not receive prop changes
+		// If we were to use keys the Context Menu would close on re-render
+		const event = new CustomEvent("lyrics-plus", {
+			detail: {
+				type: "translation-menu",
+				items
+			}
+		});
+		document.dispatchEvent(event);
+	}, [friendlyLanguage]);
 
 	return react.createElement(
 		Spicetify.ReactComponent.TooltipWrapper,
@@ -157,43 +206,12 @@ const TranslationMenu = react.memo(({ showTranslationButton, friendlyLanguage, h
 						{},
 						react.createElement("h3", null, " 가사 변환하기"),
 						react.createElement(OptionList, {
-							items: [
-								{
-									desc: "번역 제공자",
-									key: `translate:translated-lyrics-source`,
-									type: ConfigSelection,
-									options: sourceOptions,
-									renderInline: true
-								},
-								{
-									desc: "언어 바꾸기",
-									key: `translate:detect-language-override`,
-									type: ConfigSelection,
-									options: languageOptions,
-									renderInline: true
-								},
-								{
-									desc: "모드",
-									key: `translation-mode:${friendlyLanguage}`,
-									type: ConfigSelection,
-									options: modeOptions,
-									renderInline: true
-								},
-								{
-									desc: "변환하기",
-									key: "translate",
-									type: ConfigSlider,
-									trigger: "click",
-									action: "toggle",
-									renderInline: true
-								}
-							],
+							type: "translation-menu",
+							items,
 							onChange: (name, value) => {
 								CONFIG.visual[name] = value;
 								localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
-								lyricContainerUpdate && lyricContainerUpdate();
-								CONFIG.visual[name] && Spicetify.showNotification("변환중...", false, 5000);
-								translator.injectExternals();
+								lyricContainerUpdate?.();
 							}
 						})
 					),
@@ -254,8 +272,8 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
 									desc: "가사 싱크",
 									key: "delay",
 									type: ConfigAdjust,
-									min: -10000,
-									max: 10000,
+									min: -Infinity,
+									max: Infinity,
 									step: 250,
 									when: () => mode === SYNCED || mode === KARAOKE
 								},
