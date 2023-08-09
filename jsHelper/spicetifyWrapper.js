@@ -393,7 +393,7 @@ window.Spicetify = {
 			PanelContent:
 				modules.find(m => m?.render?.toString().includes("scrollBarContainer")) ||
 				functionModules.find(m => m.toString().includes("scrollBarContainer")),
-			PanelSkeleton: functionModules.find(m => m.toString().includes("label") && m.toString().includes("aside")),
+			PanelSkeleton: functionModules.find(m => m.toString().includes("label") && m.toString().includes("aside")) || modules.find(m => m?.render?.toString().includes('"section"')),
 			...Object.fromEntries(menus)
 		},
 		ReactHook: {
@@ -415,6 +415,8 @@ window.Spicetify = {
 		Mousetrap: cache.find(m => m?.addKeycodes),
 		Locale: modules.find(m => m?._dictionary)
 	});
+
+	if (Spicetify.Locale) Spicetify.Locale._supportedLocales = cache.find(m => typeof m?.ja === "string");
 
 	Object.defineProperty(Spicetify, "Queue", {
 		get() {
@@ -1376,7 +1378,10 @@ Spicetify.ContextMenu = (function () {
 			});
 
 			for (const child of currentItem._items) {
-				if (!child.shouldAdd(uris, uids, contextUri)) {
+				try {
+					if (!child.shouldAdd(uris, uids, contextUri)) continue;
+				} catch (e) {
+					console.error(e);
 					continue;
 				}
 
@@ -1438,7 +1443,10 @@ Spicetify.ContextMenu = (function () {
 
 		const elemList = [];
 		for (const item of itemList) {
-			if (!item.shouldAdd(uris, uids, contextUri)) {
+			try {
+				if (!item.shouldAdd(uris, uids, contextUri)) continue;
+			} catch (e) {
+				console.error(e);
 				continue;
 			}
 
@@ -1991,7 +1999,10 @@ Spicetify.Playbar = (function () {
 
 	// Workaround for older versions
 	let currentPanelId = 0,
-		fallback = false;
+		fallback = false,
+		refreshTimeout,
+		init = true;
+
 	if (!Spicetify.Platform.PanelAPI.getLastCachedPanelState) {
 		fallback = true;
 		Spicetify.Platform.PanelAPI.subscribeToPanelState(panelId => {
@@ -2012,13 +2023,20 @@ Spicetify.Playbar = (function () {
 			this.state = { hasError: false };
 		}
 
-		static getDerivedStateFromError(error) {
+		static getDerivedStateFromError() {
 			// Update state so the next render will show the fallback UI.
 			return { hasError: true };
 		}
 
 		componentDidCatch(error, info) {
-			Spicetify.showNotification(`Something went wrong in panel ID "${this.props.id}", check Console for error log`, true);
+			const extension =
+				Spicetify.Config.extensions.find(ext => error.stack.includes(ext)) ||
+				Spicetify.Config.custom_apps.find(app => error.stack.includes(`spicetify-routes-${app}`));
+
+			Spicetify.showNotification(
+				`Something went wrong in panel ID "${this.props.id}" ${extension ? `of "${extension}"` : ""}, check Console for error log`,
+				true
+			);
 			console.error(error);
 			console.error(`Error stack in panel ID "${this.props.id}": ${info.componentStack}`);
 			Spicetify.Panel.setPanel(Spicetify.Panel.reservedPanelIds.Disabled);
@@ -2042,7 +2060,18 @@ Spicetify.Playbar = (function () {
 			PanelContent: Spicetify.ReactComponent.PanelContent,
 			PanelHeader: Spicetify.ReactComponent.PanelHeader
 		},
-		hasPanel: id => contentMap.has(id),
+		hasPanel: (id, _internal) => {
+			// Render is sometimes ran before the wrapper is initialized, so we need to refresh it
+			// For some reason it doesn't trigger listeners
+			if (_internal && init) {
+				clearTimeout(refreshTimeout);
+				refreshTimeout = setTimeout(() => {
+					Spicetify.Panel.setPanel(id);
+					init = false;
+				}, 100);
+			}
+			return contentMap.has(id);
+		},
 		getPanel: id => contentMap.get(id),
 		render: () => {
 			const { currentPanel } = Spicetify.Panel;
@@ -2130,27 +2159,8 @@ Spicetify.Playbar = (function () {
 		}
 	};
 
-	// Render is sometimes ran before the wrapper is initialized, so we need to refresh it
-	(async function renderOnDemand() {
-		const { currentPanel } = Spicetify.Panel;
-		if (typeof currentPanel !== "number") {
-			setTimeout(renderOnDemand, 300);
-			return;
-		}
-
-		const cachedPanelState = await Spicetify.Platform.PanelAPI.prefs.get({ key: "ui.right_panel_content" });
-		const cachedPanelId = parseInt(cachedPanelState.entries["ui.right_panel_content"].number);
-		if (
-			!Spicetify.Panel.reservedPanelIds[cachedPanelId] &&
-			(currentPanel !== cachedPanelId || !document.querySelector(".Root__right-sidebar")?.children.length)
-		) {
-			currentPanelId = 0;
-			await Spicetify.Panel.setPanel(0);
-
-			currentPanelId = cachedPanelId;
-			Spicetify.Panel.setPanel(cachedPanelId);
-		}
-	})();
+	// Eliminate false positives
+	Spicetify.Panel.subPanelState(() => clearTimeout(refreshTimeout));
 })();
 
 (function waitForHistoryAPI() {
