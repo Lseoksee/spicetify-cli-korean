@@ -383,7 +383,7 @@ window.Spicetify = {
 			...Spicetify.ReactComponent,
 			TextComponent: modules.find(m => m?.h1 && m?.render),
 			ConfirmDialog: functionModules.find(m => m.toString().includes("isOpen") && m.toString().includes("shouldCloseOnEsc")),
-			Menu: functionModules.find(m => m.toString().includes("getInitialFocusElement")),
+			Menu: functionModules.find(m => m.toString().includes("getInitialFocusElement") && m.toString().includes("children")),
 			MenuItem: functionModules.find(m => m.toString().includes("handleMouseEnter") && m.toString().includes("onClick")),
 			Slider: wrapProvider(functionModules.find(m => m.toString().includes("onStepBackward"))),
 			RemoteConfigProvider: functionModules.find(m => m.toString().includes("resolveSuspense") && m.toString().includes("configuration")),
@@ -1025,34 +1025,37 @@ Spicetify.SVGIcons = {
 };
 
 (async function waitUserAPI() {
-	if (!Spicetify.Platform?.UserAPI?._product_state) {
+	if (!Spicetify.Platform?.UserAPI) {
 		setTimeout(waitUserAPI, 1000);
 		return;
 	}
 
 	let subRequest;
 
+	// product_state was renamed to product_state_service in Spotify 1.2.21
+	const productState = Spicetify.Platform.UserAPI?._product_state || Spicetify.Platform.UserAPI?._product_state_service;
+
 	Spicetify.AppTitle = {
 		set: async name => {
 			if (subRequest) subRequest.cancel();
-			await Spicetify.Platform.UserAPI._product_state.putOverridesValues({ pairs: { name } });
-			subRequest = Spicetify.Platform.UserAPI._product_state.subValues({ keys: ["name"] }, ({ pairs }) => {
+			await productState.putOverridesValues({ pairs: { name } });
+			subRequest = productState.subValues({ keys: ["name"] }, ({ pairs }) => {
 				if (pairs.name !== name) {
-					Spicetify.Platform.UserAPI._product_state.putOverridesValues({ pairs: { name } }); // Restore name
+					productState.putOverridesValues({ pairs: { name } }); // Restore name
 				}
 			});
 			return subRequest;
 		},
 		get: async () => {
-			const value = await Spicetify.Platform.UserAPI._product_state.getValues();
+			const value = await productState.getValues();
 			return value.pairs.name;
 		},
 		reset: async () => {
 			if (subRequest) subRequest.cancel();
-			await Spicetify.Platform.UserAPI._product_state.delOverridesValues({ keys: ["name"] });
+			await productState.delOverridesValues({ keys: ["name"] });
 		},
 		sub: callback => {
-			return Spicetify.Platform.UserAPI._product_state.subValues({ keys: ["name"] }, ({ pairs }) => {
+			return productState.subValues({ keys: ["name"] }, ({ pairs }) => {
 				callback(pairs.name);
 			});
 		}
@@ -1842,7 +1845,9 @@ Spicetify.Playbar = (function () {
 		constructor(label, icon, onClick = () => {}, disabled = false, active = false, registerOnCreate = true) {
 			this.element = document.createElement("button");
 			this.element.classList.add("main-genericButton-button");
-			this.element.style.display = "block";
+			this.iconElement = document.createElement("span");
+			this.iconElement.classList.add("Wrapper-sm-only");
+			this.element.appendChild(this.iconElement);
 			this.icon = icon;
 			this.onClick = onClick;
 			this.disabled = disabled;
@@ -1871,7 +1876,7 @@ Spicetify.Playbar = (function () {
 				input = `<svg height="16" width="16" viewBox="0 0 16 16" fill="currentColor" stroke="currentColor">${Spicetify.SVGIcons[input]}</svg>`;
 			}
 			this._icon = input;
-			this.element.innerHTML = input;
+			this.iconElement.innerHTML = input;
 		}
 		get onClick() {
 			return this._onClick;
