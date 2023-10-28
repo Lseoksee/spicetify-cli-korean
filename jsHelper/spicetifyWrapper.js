@@ -126,7 +126,6 @@ window.Spicetify = {
 			"LocalStorage",
 			"Queue",
 			"removeFromQueue",
-			"sendNotification",
 			"showNotification",
 			"Menu",
 			"ContextMenu",
@@ -448,23 +447,26 @@ window.Spicetify = {
 	if (Spicetify.Color) Spicetify.Color.CSSFormat = modules.find(m => m?.RGBA);
 
 	// Combine snackbar and notification
-	(async function bindShowNotification() {
-		if (!(Spicetify.Snackbar || Spicetify.sendNotification)) {
+	(function bindShowNotification() {
+		if (!Spicetify.Snackbar && !Spicetify.showNotification) {
 			setTimeout(bindShowNotification, 10);
 			return;
 		}
 
-		Spicetify.showNotification = (message, isError = false, msTimeout) => {
-			if (!Spicetify.Snackbar?.enqueueSnackbar) {
-				Spicetify.sendNotification(message, isError, msTimeout);
-				return;
-			}
-
-			Spicetify.Snackbar.enqueueSnackbar(message, {
-				variant: isError ? "error" : "default",
-				autoHideDuration: msTimeout
-			});
-		};
+		if (Spicetify.Snackbar?.enqueueSnackbar && !Spicetify.showNotification) {
+			Spicetify.showNotification = (message, isError = false, msTimeout) => {
+				Spicetify.Snackbar.enqueueSnackbar(message, {
+					variant: isError ? "error" : "default",
+					autoHideDuration: msTimeout
+				});
+			};
+		} else {
+			if (!Spicetify.Snackbar) Spicetify.Snackbar = {};
+			Spicetify.Snackbar.enqueueSnackbar = (message, { variant = "default", autoHideDuration }) => {
+				isError = variant === "error";
+				Spicetify.showNotification(message, isError, autoHideDuration);
+			};
+		}
 	})();
 
 	// Image color extractor
@@ -688,7 +690,19 @@ Spicetify.LocalStorage = {
 };
 
 Spicetify._getStyledClassName = (args, component) => {
-	const includedKeys = ["role", "variant", "semanticColor", "iconColor", "color", "weight", "buttonSize", "iconSize", "position", "data-encore-id"];
+	const includedKeys = [
+		"role",
+		"variant",
+		"semanticColor",
+		"iconColor",
+		"color",
+		"weight",
+		"buttonSize",
+		"iconSize",
+		"position",
+		"data-encore-id",
+		"$size" // >= 1.2.23
+	];
 	const customKeys = ["padding", "blocksize"];
 
 	const element = Array.from(args).find(
@@ -710,7 +724,7 @@ Spicetify._getStyledClassName = (args, component) => {
 		}
 	}
 
-	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", ""];
+	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", ""];
 	const excludedPrefix = ["aria-"];
 
 	const childrenProps = ["iconLeading", "iconTrailing", "iconOnly"];
@@ -1874,7 +1888,7 @@ Spicetify.Playbar = (function () {
 			this.element = document.createElement("button");
 			this.element.classList.add("main-genericButton-button");
 			this.iconElement = document.createElement("span");
-			this.iconElement.classList.add("Wrapper-sm-only");
+			this.iconElement.classList.add("Wrapper-sm-only", "Wrapper-small-only");
 			this.element.appendChild(this.iconElement);
 			this.icon = icon;
 			this.onClick = onClick;
@@ -1924,6 +1938,7 @@ Spicetify.Playbar = (function () {
 		set active(bool) {
 			this._active = bool;
 			this.element.classList.toggle("main-genericButton-buttonActive", bool);
+			this.element.classList.toggle("main-genericButton-buttonActiveDot", bool);
 		}
 		get active() {
 			return this._active;
