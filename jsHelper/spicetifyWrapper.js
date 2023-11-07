@@ -384,7 +384,9 @@ window.Spicetify = {
 		ReactComponent: {
 			...Spicetify.ReactComponent,
 			TextComponent: modules.find(m => m?.h1 && m?.render),
-			ConfirmDialog: functionModules.find(m => m.toString().includes("isOpen") && m.toString().includes("shouldCloseOnEsc")),
+			ConfirmDialog: functionModules.find(
+				m => m.toString().includes("isOpen") && m.toString().includes("shouldCloseOnEsc") && m.toString().includes("onClose")
+			),
 			Menu: functionModules.find(m => m.toString().includes("getInitialFocusElement") && m.toString().includes("children")),
 			MenuItem: functionModules.find(m => m.toString().includes("handleMouseEnter") && m.toString().includes("onClick")),
 			Slider: wrapProvider(functionModules.find(m => m.toString().includes("onStepBackward"))),
@@ -407,7 +409,8 @@ window.Spicetify = {
 			Snackbar: {
 				wrapper: functionModules.find(m => m.toString().includes("encore-light-theme")),
 				simpleLayout: functionModules.find(m => m.toString().includes("leading")),
-				ctaText: functionModules.find(m => m.toString().includes("ctaText"))
+				ctaText: functionModules.find(m => m.toString().includes("ctaText")),
+				styledImage: functionModules.find(m => m.toString().includes("placeholderSrc"))
 			},
 			...Object.fromEntries(menus)
 		},
