@@ -237,7 +237,31 @@ func disableSentry(input string) string {
 func disableLogging(input string) string {
 	utils.Replace(&input, `sp://logging/v3/\w+`, "")
 	utils.Replace(&input, `[^"\/]+\/[^"\/]+\/(public\/)?v3\/events`, "")
-	utils.Replace(&input, `(\(e,\s*t\))\s*{(\s*return\s*this\.storageAdapter\.setItem\([${}\w."`+"`"+`()]+,\s*t\)\s*)}`, "${1}{return null}")
+
+	utils.Replace(&input, `key:"registerEventListeners",value:function\(\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"logInteraction",value:function\([\w,]+\)\{`, "${0}return{interactionId:null,pageInstanceId:null};")
+	utils.Replace(&input, `key:"logNonAuthInteraction",value:function\([\w,]+\)\{`, "${0}return{interactionId:null,pageInstanceId:null};")
+	utils.Replace(&input, `key:"logImpression",value:function\([\w,]+\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"logNonAuthImpression",value:function\([\w,]+\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"logNavigation",value:function\([\w,]+\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"logClientLostFocus",value:function\(\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"logClientGainedFocus",value:function\(\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"createLoggingParams",value:function\([\w,]+\)\{`, "${0}return;")
+	utils.Replace(&input, `key:"initSendingEvents",value:function\(\)\{`, "${0}return;")
+	utils.Replace(&input, `(\{key:"send",value:function\([\w,]+\))\{[\d\w\s,{}()[\]\.,!\?=>&|;:_""]+?\}(\},\{key:"hasContext")`, "${1}{return;}${2}")
+	utils.Replace(&input, `key:"lastFlush",value:function\(\)\{`, "${0}return;")
+
+	utils.Replace(&input, `(\}registerEventListeners\(\))\{.+?\}(unregisterEventListeners)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}logInteraction\([\w,]+\))\{.+?\}(logImpression)`, "${1}{return{interactionId:null,pageInstanceId:null};}${2}")
+	utils.Replace(&input, `(\}logImpression\([\w,]+\))\{.+?\}(logNavigation)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}logNavigation\([\w,]+\))\{.+?\}(getPageInstanceId|getInteractionId)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}logClientLostFocus\(\))\{.+?\}(logClientGainedFocus)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}logClientGainedFocus\(\))\{.+?\}(getPageInstanceId|addEventListeners)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}createLoggingParams\([\w,]+\))\{.+?\}(async pullToLocal)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}initSendingEvents\(\))\{.+?\}(initializeContexts)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}send\([\w,:=!\d{}]+\))\{.+?\}(hasContext)`, "${1}{return;}${2}")
+	utils.Replace(&input, `(\}lastFlush\(\))\{.+?\}(flush\(\))`, "${1}{return;}${2}")
+
 	return input
 }
 
@@ -346,7 +370,6 @@ Spicetify.React.useEffect(() => {
 		`case [\w$.]+BuddyFeed:(?:return ?|[\w$]+=)[\w$?]*(?:\([\w$.,]+\)\([\w(){},.:]+)?;(?:break;)?(?:case [\w$.]+:(?:return ?|[\w$]+=)[\w$?]*(?:\([\w$.,]+\)\([\w(){},.:]+)?[\w:]*;(?:break;)?)*default:(?:return ?|[\w$]+=)`,
 		`${0} Spicetify.Panel?.render()??`)
 
-	// Snackbar https://mui.com/material-ui/react-snackbar/
 	utils.Replace(
 		&input,
 		`\b\w\s*\(\)\s*[^;,]*enqueueCustomSnackbar:\s*(\w)\s*[^;]*;`,
@@ -439,11 +462,16 @@ if (${1}.popper?.firstChild?.id === "context-menu") {
 		`([\w$]+)=((?:function|\()([\w$.,{}()= ]+(?:springConfig|overshootClamping)){2})`,
 		`${1}=Spicetify.ReactFlipToolkit.spring=${2}`)
 
-	// Snackbar https://mui.com/material-ui/react-snackbar/
+	// Snackbar https://github.com/iamhosseindhv/notistack
 	utils.Replace(
 		&input,
-		`\w+\s*=\s*\w\.call\(this,[^)]+\)\s*\|\|\s*this\)\.enqueueSnackbar`,
-		`Spicetify.Snackbar=${0}`)
+		`\(\w+\s*=\s*\w\.call\(this,[^)]+\)\s*\|\|\s*this\)\.enqueueSnackbar`,
+		` Spicetify.Snackbar.enqueueSnackbar=${0}`)
+
+	utils.Replace(
+		&input,
+		`\w+.closeSnackbar=function`,
+		`Spicetify.Snackbar.closeSnackbar=${0}`)
 
 	return input
 }
