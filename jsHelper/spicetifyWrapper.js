@@ -72,12 +72,8 @@ window.Spicetify = {
 			Spicetify.Player.setMute(!Spicetify.Player.getMute());
 		},
 		setMute: b => {
-			if (b) {
-				const volume = Spicetify.Player.getVolume();
-				if (volume > 0) Spicetify.Player._volumeBeforeMute = volume;
-				Spicetify.Player.setVolume(0);
-			} else {
-				Spicetify.Player.setVolume(Spicetify.Player._volumeBeforeMute);
+			if (b !== Spicetify.Player.getMute()) {
+				document.querySelector(".volume-bar__icon-button")?.click();
 			}
 		},
 		formatTime: ms => {
@@ -214,8 +210,7 @@ window.Spicetify = {
 			"toggleShuffle",
 			"origin",
 			"playUri",
-			"setHeart",
-			"_volumeBeforeMute"
+			"setHeart"
 		];
 
 		const REACT_COMPONENT = [
@@ -429,7 +424,7 @@ window.Spicetify = {
 				styledImage: functionModules.find(m => m.toString().includes("placeholderSrc"))
 			},
 			Chip: modules.find(m => m?.render?.toString().includes("invertedDark") && m?.render?.toString().includes("isUsingKeyboard")),
-			Toggle: functionModules.find(m => m.toString().includes("onSelected")) && functionModules.find(m => m.toString().includes('type:"checkbox"')),
+			Toggle: functionModules.find(m => m.toString().includes("onSelected") && m.toString().includes('type:"checkbox"')),
 			...Object.fromEntries(menus)
 		},
 		ReactHook: {
@@ -449,15 +444,22 @@ window.Spicetify = {
 		},
 		_reservedPanelIds: modules.find(m => m?.BuddyFeed),
 		Mousetrap: cache.find(m => m?.addKeycodes),
+		Locale: modules.find(m => m?._dictionary)
+	});
+
+	(function waitForSnackbar() {
+		if (!Object.keys(Spicetify.Snackbar).length) {
+			setTimeout(waitForSnackbar, 100);
+			return;
+		}
 		// Snackbar notifications
 		// https://github.com/iamhosseindhv/notistack
-		Snackbar: {
+		Spicetify.Snackbar = {
 			...Spicetify.Snackbar,
 			SnackbarProvider: functionModules.find(m => m.toString().includes("enqueueSnackbar called with invalid argument")),
 			useSnackbar: functionModules.find(m => m.toString().match(/\{return\(0,\w+\.useContext\)\(\w+\)\}/))
-		},
-		Locale: modules.find(m => m?._dictionary)
-	});
+		};
+	})();
 
 	const localeModule = modules.find(m => m?.getTranslations);
 	if (localeModule) {
@@ -686,7 +688,7 @@ window.Spicetify = {
 	}
 
 	const interval = setInterval(() => {
-		if (!Spicetify.Player.origin._state) return;
+		if (!Spicetify.Player.origin._state?.item) return;
 		Spicetify.Player.data = Spicetify.Player.origin._state;
 		clearInterval(interval);
 	}, 10);
@@ -697,7 +699,7 @@ window.Spicetify = {
 	};
 
 	Spicetify.Player.origin._events.addListener("update", ({ data: playerEventData }) => {
-		playerState.current = playerEventData;
+		playerState.current = playerEventData.item ? playerEventData : null;
 		Spicetify.Player.data = playerState.current;
 
 		if (playerState.cache?.item?.uri !== playerState.current?.item?.uri) {
@@ -715,13 +717,6 @@ window.Spicetify = {
 		playerState.cache = playerState.current;
 	});
 
-	Spicetify.Player.origin._events.addListener("error", ({ data: error }) => {
-		if (error.code === "all_tracks_unplayable_auto_stopped") {
-			Spicetify.Player.data = null;
-			playerState.cache = null;
-		}
-	});
-
 	setInterval(() => {
 		if (playerState.cache?.isPaused === false) {
 			const event = new Event("onprogress");
@@ -736,21 +731,6 @@ window.Spicetify = {
 	Spicetify.removeFromQueue = uri => {
 		return Spicetify.Player.origin._queue.removeFromQueue(uri);
 	};
-
-	Spicetify.Player._volumeBeforeMute = Spicetify.Player.getVolume() || 0.7;
-})();
-
-(function waitForPlaybackAPI() {
-	if (!Spicetify.Platform?.PlaybackAPI) {
-		setTimeout(waitForPlaybackAPI, 10);
-		return;
-	}
-
-	Spicetify.Platform.PlaybackAPI._events.addListener("volume", ({ data: { volume } }) => {
-		if (volume > 0) {
-			Spicetify.Player._volumeBeforeMute = volume;
-		}
-	});
 })();
 
 Spicetify.getAudioData = async uri => {
@@ -2338,7 +2318,7 @@ Spicetify.Playbar = (function () {
 							}),
 							Spicetify.React.cloneElement(children, { panel: id })
 						)
-				  );
+					);
 
 			contentMap.set(id, Spicetify.React.createElement(ErrorBoundary, { id }, content));
 

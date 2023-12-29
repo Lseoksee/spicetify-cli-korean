@@ -4,7 +4,7 @@ function DraggableComponent({ uri, title, children }) {
 		? react.cloneElement(children, {
 				onDragStart: dragHandler,
 				draggable: "true"
-		  })
+			})
 		: children;
 }
 
@@ -31,7 +31,31 @@ class Card extends react.Component {
 
 	closeButtonClicked(event) {
 		removeCards(this.props.uri);
-		Spicetify.showNotification(`<b>${this.artist.name}</b>의 <b>${this.title}</b> 을(를) 숨깁니다`);
+
+		Spicetify.Snackbar.enqueueCustomSnackbar
+			? Spicetify.Snackbar.enqueueCustomSnackbar("dismissed-release", {
+					keyPrefix: "dismissed-release",
+					children: Spicetify.ReactComponent.Snackbar.wrapper({
+						children: Spicetify.ReactComponent.Snackbar.simpleLayout({
+							leading: Spicetify.ReactComponent.Snackbar.styledImage({
+								src: this.props.imageURL,
+								imageHeight: "24px",
+								imageWidth: "24px"
+							}),
+							center: Spicetify.React.createElement("div", {
+								dangerouslySetInnerHTML: {
+									__html: `<b>${this.title}</b> 을(를) 숨깁니다.`
+								}
+							}),
+							trailing: Spicetify.ReactComponent.Snackbar.ctaText({
+								ctaText: "되돌리기",
+								onCtaClick: () => removeCards(this.props.uri, "undo")
+							})
+						})
+					})
+				})
+			: Spicetify.showNotification(`<b>${this.title}</b>의 <br>${this.artist.name}</b> 을(를) 숨깁니다`);
+
 		event.stopPropagation();
 	}
 
@@ -145,7 +169,7 @@ class Card extends react.Component {
 											className: "main-card-closeButton-svg"
 										},
 										react.createElement("path", {
-											d: "M1.47 1.47a.75.75 0 0 1 1.06 0L8 6.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L9.06 8l5.47 5.47a.75.75 0 1 1-1.06 1.06L8 9.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L6.94 8 1.47 2.53a.75.75 0 0 1 0-1.06z",
+											d: "M2.47 2.47a.75.75 0 0 1 1.06 0L8 6.94l4.47-4.47a.75.75 0 1 1 1.06 1.06L9.06 8l4.47 4.47a.75.75 0 1 1-1.06 1.06L8 9.06l-4.47 4.47a.75.75 0 0 1-1.06-1.06L6.94 8 2.47 3.53a.75.75 0 0 1 0-1.06Z",
 											fill: "var(--spice-text)",
 											fillRule: "evenodd"
 										})
