@@ -2,7 +2,7 @@ const ButtonSVG = ({ icon, active = true, onClick }) => {
 	return react.createElement(
 		"button",
 		{
-			className: "switch" + (active ? "" : " disabled"),
+			className: `switch${active ? "" : " disabled"}`,
 			onClick
 		},
 		react.createElement("svg", {
@@ -51,7 +51,7 @@ const CacheButton = () => {
 	}
 
 	const [count, setCount] = useState(Object.keys(lyrics).length);
-	const text = !!count ? "저장된 가사 지우기" : "저장된 가사 없음";
+	const text = count ? "저장된 가사 지우기" : "저장된 가사 없음";
 
 	return react.createElement(
 		"button",
@@ -72,7 +72,7 @@ const RefreshTokenButton = ({ setTokenCallback }) => {
 
 	useEffect(() => {
 		if (buttonText === "초기화중...") {
-			Spicetify.CosmosAsync.get(`https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0`, null, {
+			Spicetify.CosmosAsync.get("https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0", null, {
 				authority: "apic-desktop.musixmatch.com"
 			})
 				.then(({ message: response }) => {
@@ -147,7 +147,7 @@ const ConfigSelection = ({ name, defaultValue, options, onChange = () => {} }) =
 	const setValueCallback = useCallback(
 		event => {
 			let value = event.target.value;
-			if (!isNaN(Number(value))) {
+			if (!Number.isNaN(Number(value))) {
 				value = parseInt(value);
 			}
 			setValue(value);
@@ -294,7 +294,7 @@ const ConfigHotkey = ({ name, defaultValue, onChange = () => {} }) => {
 
 	function record() {
 		trap.handleKey = (character, modifiers, e) => {
-			if (e.type == "keydown") {
+			if (e.type === "keydown") {
 				const sequence = [...new Set([...modifiers, character])];
 				if (sequence.length === 1 && sequence[0] === "esc") {
 					onChange("");
@@ -575,25 +575,25 @@ function openConfig() {
 					desc: "배경 색상",
 					key: "background-color",
 					type: ConfigInput,
-					when: () => !CONFIG.visual["colorful"]
+					when: () => !CONFIG.visual.colorful
 				},
 				{
 					desc: "활성 상태 색상",
 					key: "active-color",
 					type: ConfigInput,
-					when: () => !CONFIG.visual["colorful"]
+					when: () => !CONFIG.visual.colorful
 				},
 				{
 					desc: "비활성 상태 색상",
 					key: "inactive-color",
 					type: ConfigInput,
-					when: () => !CONFIG.visual["colorful"]
+					when: () => !CONFIG.visual.colorful
 				},
 				{
 					desc: "텍스트 배경 강조 색상",
 					key: "highlight-color",
 					type: ConfigInput,
-					when: () => !CONFIG.visual["colorful"]
+					when: () => !CONFIG.visual.colorful
 				},
 				{
 					desc: "텍스트 변환: 일본어 감지 임계값(고급)",
@@ -617,7 +617,7 @@ function openConfig() {
 			onChange: (name, value) => {
 				CONFIG.visual[name] = value;
 				localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
-				lyricContainerUpdate && lyricContainerUpdate();
+				lyricContainerUpdate?.();
 
 				const configChange = new CustomEvent("lyrics-plus", {
 					detail: {
@@ -639,7 +639,7 @@ function openConfig() {
 			onToggle: (name, value) => {
 				CONFIG.providers[name].on = value;
 				localStorage.setItem(`${APP_NAME}:provider:${name}:on`, value);
-				lyricContainerUpdate && lyricContainerUpdate();
+				lyricContainerUpdate?.();
 			},
 			onTokenChange: (name, value) => {
 				CONFIG.providers[name].token = value;

@@ -27,7 +27,7 @@ class TabBarItem extends react.Component {
 				react.createElement(
 					"span",
 					{
-						className: `main-type-mestoBold`
+						className: "main-type-mestoBold"
 					},
 					this.props.item.value
 				)
@@ -121,7 +121,7 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 		//한글화 대응
 		let value = kormap.get(key) || key.replace(/./, c => c.toUpperCase());
 		if (key === lockLink) {
-			value = "• " + value;
+			value = `• ${value}`;
 		}
 		const active = key === activeLink;
 		return { key, value, active };
@@ -199,10 +199,10 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 				),
 			droplistItem.length || childrenSizes.length === 0
 				? react.createElement(TabBarMore, {
-						items: droplistItem.map(i => options[i]).filter(i => i),
+						items: droplistItem.map(i => options[i]).filter(Boolean),
 						switchTo: switchCallback,
 						lockIn: lockCallback
-					})
+				  })
 				: null
 		)
 	);
