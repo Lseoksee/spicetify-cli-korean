@@ -1,57 +1,57 @@
 SpicetifyHomeConfig = {};
 
 (async () => {
-    // Status enum
-    const NORMAL = 0;
-    const STICKY = 1;
-    const LOWERED = 2;
-    // List of sections' metadata
-    let list;
-    // Store sections' statuses
-    const statusDic = {};
-    let mounted = false;
+	// Status enum
+	const NORMAL = 0;
+	const STICKY = 1;
+	const LOWERED = 2;
+	// List of sections' metadata
+	let list;
+	// Store sections' statuses
+	const statusDic = {};
+	let mounted = false;
 
-    SpicetifyHomeConfig.arrange = (sections) => {
-        mounted = true;
-        if (list) {
-            return list;
-        }
-        const stickList = (localStorage.getItem("spicetify-home-config:stick") || "").split(",");
-        const lowList = (localStorage.getItem("spicetify-home-config:low") || "").split(",");
-        const stickSections = [];
-        const lowSections = [];
-        for (const uri of stickList) {
-            const index = sections.findIndex((a) => a?.uri === uri);
-            if (index !== -1) {
-                const item = sections[index];
-                statusDic[item.uri] = STICKY;
-                stickSections.push(item);
-                sections[index] = undefined;
-            }
-        }
-        for (const uri of lowList) {
-            const index = sections.findIndex((a) => a?.uri === uri);
-            if (index !== -1) {
-                const item = sections[index];
-                statusDic[item.uri] = LOWERED;
-                lowSections.push(item);
-                sections[index] = undefined;
-            }
-        }
-        sections = sections.filter(Boolean);
+	SpicetifyHomeConfig.arrange = sections => {
+		mounted = true;
+		if (list) {
+			return list;
+		}
+		const stickList = (localStorage.getItem("spicetify-home-config:stick") || "").split(",");
+		const lowList = (localStorage.getItem("spicetify-home-config:low") || "").split(",");
+		const stickSections = [];
+		const lowSections = [];
+		for (const uri of stickList) {
+			const index = sections.findIndex(a => a?.uri === uri);
+			if (index !== -1) {
+				const item = sections[index];
+				statusDic[item.uri] = STICKY;
+				stickSections.push(item);
+				sections[index] = undefined;
+			}
+		}
+		for (const uri of lowList) {
+			const index = sections.findIndex(a => a?.uri === uri);
+			if (index !== -1) {
+				const item = sections[index];
+				statusDic[item.uri] = LOWERED;
+				lowSections.push(item);
+				sections[index] = undefined;
+			}
+		}
+		sections = sections.filter(Boolean);
 
-        list = [...stickSections, ...sections, ...lowSections];
-        return list;
-    };
+		list = [...stickSections, ...sections, ...lowSections];
+		return list;
+	};
 
-    const up = document.createElement("button");
-    up.innerText = "위로";
-    const down = document.createElement("button");
-    down.innerText = "아래로";
-    const lower = document.createElement("button");
-    const stick = document.createElement("button");
-    const style = document.createElement("style");
-    style.innerHTML = `
+	const up = document.createElement("button");
+	up.innerText = "위로";
+	const down = document.createElement("button");
+	down.innerText = "아래로";
+	const lower = document.createElement("button");
+	const stick = document.createElement("button");
+	const style = document.createElement("style");
+	style.innerHTML = `
 #spicetify-home-config {
     position: relative;
     width: 100%;
@@ -74,122 +74,122 @@ SpicetifyHomeConfig = {};
 }
 `;
 
-    const container = document.createElement("div");
-    container.id = "spicetify-home-config";
-    container.append(style, up, down, lower, stick);
-    let elem = [];
+	const container = document.createElement("div");
+	container.id = "spicetify-home-config";
+	container.append(style, up, down, lower, stick);
+	let elem = [];
 
-    function injectInteraction() {
-        const main = document.querySelector(".main-home-content");
-        elem = [...main.querySelectorAll("section")];
-        for (const [index, item] of elem.entries()) {
-            item.dataset.uri = list[index].uri;
-        }
+	function injectInteraction() {
+		const main = document.querySelector(".main-home-content");
+		elem = [...main.querySelectorAll("section")];
+		for (const [index, item] of elem.entries()) {
+			item.dataset.uri = list[index].uri;
+		}
 
-        function appendItems() {
-            const stick = [];
-            const low = [];
-            const normal = [];
-            for (const el of elem) {
-                if (statusDic[el.dataset.uri] === STICKY) stick.push(el);
-                else if (statusDic[el.dataset.uri] === LOWERED) low.push(el);
-                else normal.push(el);
-            }
+		function appendItems() {
+			const stick = [];
+			const low = [];
+			const normal = [];
+			for (const el of elem) {
+				if (statusDic[el.dataset.uri] === STICKY) stick.push(el);
+				else if (statusDic[el.dataset.uri] === LOWERED) low.push(el);
+				else normal.push(el);
+			}
 
-            localStorage.setItem(
-                "spicetify-home-config:stick",
-                stick.map((a) => a.dataset.uri)
-            );
-            localStorage.setItem(
-                "spicetify-home-config:low",
-                low.map((a) => a.dataset.uri)
-            );
+			localStorage.setItem(
+				"spicetify-home-config:stick",
+				stick.map(a => a.dataset.uri)
+			);
+			localStorage.setItem(
+				"spicetify-home-config:low",
+				low.map(a => a.dataset.uri)
+			);
 
-            elem = [...stick, ...normal, ...low];
-            main.append(...elem);
-        }
+			elem = [...stick, ...normal, ...low];
+			main.append(...elem);
+		}
 
-        function onSwap(item, dir) {
-            container.remove();
-            const curPos = elem.findIndex((e) => e === item);
-            const newPos = curPos + dir;
-            if (newPos < 0 || newPos > elem.length - 1) return;
+		function onSwap(item, dir) {
+			container.remove();
+			const curPos = elem.findIndex(e => e === item);
+			const newPos = curPos + dir;
+			if (newPos < 0 || newPos > elem.length - 1) return;
 
-            [elem[curPos], elem[newPos]] = [elem[newPos], elem[curPos]];
-            [list[curPos], list[newPos]] = [list[newPos], list[curPos]];
-            appendItems();
-        }
+			[elem[curPos], elem[newPos]] = [elem[newPos], elem[curPos]];
+			[list[curPos], list[newPos]] = [list[newPos], list[curPos]];
+			appendItems();
+		}
 
-        function onChangeStatus(item, status) {
-            container.remove();
-            const isToggle = statusDic[item.dataset.uri] === status;
-            statusDic[item.dataset.uri] = isToggle ? NORMAL : status;
-            appendItems();
-        }
+		function onChangeStatus(item, status) {
+			container.remove();
+			const isToggle = statusDic[item.dataset.uri] === status;
+			statusDic[item.dataset.uri] = isToggle ? NORMAL : status;
+			appendItems();
+		}
 
-        for (const el of elem) {
-            el.onmouseover = () => {
-                const status = statusDic[el.dataset.uri];
-                const index = elem.findIndex((a) => a === el);
+		for (const el of elem) {
+			el.onmouseover = () => {
+				const status = statusDic[el.dataset.uri];
+				const index = elem.findIndex(a => a === el);
 
-                if (!status || index === 0 || status !== statusDic[elem[index - 1]?.dataset.uri]) {
-                    up.disabled = true;
-                } else {
-                    up.disabled = false;
-                    up.onclick = () => onSwap(el, -1);
-                }
+				if (!status || index === 0 || status !== statusDic[elem[index - 1]?.dataset.uri]) {
+					up.disabled = true;
+				} else {
+					up.disabled = false;
+					up.onclick = () => onSwap(el, -1);
+				}
 
-                if (!status || index === elem.length - 1 || status !== statusDic[elem[index + 1]?.dataset.uri]) {
-                    down.disabled = true;
-                } else {
-                    down.disabled = false;
-                    down.onclick = () => onSwap(el, 1);
-                }
+				if (!status || index === elem.length - 1 || status !== statusDic[elem[index + 1]?.dataset.uri]) {
+					down.disabled = true;
+				} else {
+					down.disabled = false;
+					down.onclick = () => onSwap(el, 1);
+				}
 
-                stick.innerText = status === STICKY ? "고정해제" : "상단에 고정";
-                lower.innerText = status === LOWERED ? "표시하기" : "숨기기";
-                lower.onclick = () => onChangeStatus(el, LOWERED);
-                stick.onclick = () => onChangeStatus(el, STICKY);
+				stick.innerText = status === STICKY ? "고정해제" : "상단에 고정";
+				lower.innerText = status === LOWERED ? "표시하기" : "숨기기";
+				lower.onclick = () => onChangeStatus(el, LOWERED);
+				stick.onclick = () => onChangeStatus(el, STICKY);
 
-                el.prepend(container);
-            };
-        }
-    }
+				el.prepend(container);
+			};
+		}
+	}
 
-    function removeInteraction() {
-        container.remove();
-        for (const a of elem) {
-            a.onmouseover = undefined;
-        }
-    }
+	function removeInteraction() {
+		container.remove();
+		for (const a of elem) {
+			a.onmouseover = undefined;
+		}
+	}
 
-    await new Promise((res) => Spicetify.Events.webpackLoaded.on(res));
+	await new Promise(res => Spicetify.Events.webpackLoaded.on(res));
 
-    const menu = new Spicetify.Menu.Item("홈 화면 수정하기", true, (self) => {
-        self.isEnabled = !self.isEnabled;
-        if (self.isEnabled) {
-            injectInteraction();
-        } else {
-            removeInteraction();
-        }
-    });
-    SpicetifyHomeConfig.addToMenu = () => menu.register();
-    SpicetifyHomeConfig.removeMenu = () => {
-        menu.isEnabled = false;
-        menu.deregister();
-    };
+	const menu = new Spicetify.Menu.Item("홈 화면 수정하기", true, self => {
+		self.isEnabled = !self.isEnabled;
+		if (self.isEnabled) {
+			injectInteraction();
+		} else {
+			removeInteraction();
+		}
+	});
+	SpicetifyHomeConfig.addToMenu = () => menu.register();
+	SpicetifyHomeConfig.removeMenu = () => {
+		menu.isEnabled = false;
+		menu.deregister();
+	};
 
-    await new Promise((res) => Spicetify.Events.platformLoaded.on(res));
-    // Init
-    if (Spicetify.Platform.History.location.pathname === "/") {
-        SpicetifyHomeConfig.addToMenu();
-    }
+	await new Promise(res => Spicetify.Events.platformLoaded.on(res));
+	// Init
+	if (Spicetify.Platform.History.location.pathname === "/") {
+		SpicetifyHomeConfig.addToMenu();
+	}
 
-    Spicetify.Platform.History.listen(({ pathname }) => {
-        if (pathname === "/") {
-            SpicetifyHomeConfig.addToMenu();
-        } else {
-            SpicetifyHomeConfig.removeMenu();
-        }
-    });
+	Spicetify.Platform.History.listen(({ pathname }) => {
+		if (pathname === "/") {
+			SpicetifyHomeConfig.addToMenu();
+		} else {
+			SpicetifyHomeConfig.removeMenu();
+		}
+	});
 })();
