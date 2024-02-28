@@ -117,6 +117,7 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 		["genius", "Genius"]
 	]);
 
+	if (Spicetify.Platform.version >= "1.2.31") links = links.filter(key => key !== "genius");
 	const options = links.map(key => {
 		//한글화 대응
 		let value = kormap.get(key) || key.replace(/./, c => c.toUpperCase());
