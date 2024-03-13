@@ -232,7 +232,7 @@ func insertCustomApp(jsPath string, flags Flag) {
 				REACT_ELEMENT_REGEX})
 
 		if (len(reactSymbs) < 2) || (len(eleSymbs) == 0) {
-			utils.PrintError("Spotify version mismatch with Spicetify\nSpicetify currently only supports until Spotify v" + flags.SpotifyVer)
+			utils.PrintError("Spotify version mismatch with Spicetify. Please report it on our github repository.")
 			return content
 		}
 
@@ -369,9 +369,9 @@ func insertHomeConfig(jsPath string, flags Flag) {
 	utils.ModifyFile(jsPath, func(content string) string {
 		utils.ReplaceOnce(
 			&content,
-			`([\w$_\.]+\.sections\.items)(\.map)`,
+			`(createDesktopHomeFeatureActivationShelfEventFactory.*?)([\w\.]+)(\.map)`,
 			func(submatches ...string) string {
-				return fmt.Sprintf("SpicetifyHomeConfig.arrange(%s)%s", submatches[1], submatches[2])
+				return fmt.Sprintf("%sSpicetifyHomeConfig.arrange(%s)%s", submatches[1], submatches[2], submatches[3])
 			})
 		return content
 	})

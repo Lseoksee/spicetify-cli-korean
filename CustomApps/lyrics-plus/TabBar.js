@@ -103,7 +103,7 @@ const TabBarContext = ({ children }) => {
 	);
 };
 
-const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCallback, windowSize = Infinity }) => {
+const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCallback, windowSize = Number.POSITIVE_INFINITY }) => {
 	const tabBarRef = react.useRef(null);
 	const [childrenSizes, setChildrenSizes] = useState([]);
 	const [availableSpace, setAvailableSpace] = useState(0);
@@ -117,16 +117,16 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 		["genius", "Genius"]
 	]);
 
-	if (Spicetify.Platform.version >= "1.2.31") links = links.filter(key => key !== "genius");
-	const options = links.map(key => {
+	const options = [];
+	for (let i = 0; i < links.length; i++) {
+		const key = links[i];
+		if (spotifyVersion >= "1.2.31" && key === "genius") continue;
 		//한글화 대응
-		let value = kormap.get(key) || key.replace(/./, c => c.toUpperCase());
-		if (key === lockLink) {
-			value = `• ${value}`;
-		}
+		let value = kormap.get(key) || key[0].toUpperCase() + key.slice(1);
+		if (key === lockLink) value = `• ${value}`;
 		const active = key === activeLink;
-		return { key, value, active };
-	});
+		options.push({ key, value, active });
+	}
 
 	useEffect(() => {
 		if (!tabBarRef.current) return;
@@ -136,8 +136,10 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 	useEffect(() => {
 		if (!tabBarRef.current) return;
 
-		const children = Array.from(tabBarRef.current.children);
-		const tabbarItemSizes = children.map(child => child.clientWidth);
+		const tabbarItemSizes = [];
+		for (const child of tabBarRef.current.children) {
+			tabbarItemSizes.push(child.clientWidth);
+		}
 
 		setChildrenSizes(tabbarItemSizes);
 	}, [links]);

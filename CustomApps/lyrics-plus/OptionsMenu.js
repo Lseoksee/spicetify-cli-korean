@@ -272,8 +272,8 @@ const AdjustmentsMenu = react.memo(({ mode }) => {
 									desc: "가사 싱크",
 									key: "delay",
 									type: ConfigAdjust,
-									min: -Infinity,
-									max: Infinity,
+									min: Number.NEGATIVE_INFINITY,
+									max: Number.POSITIVE_INFINITY,
 									step: 250,
 									when: () => mode === SYNCED || mode === KARAOKE
 								},
