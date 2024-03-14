@@ -965,7 +965,8 @@ Spicetify._getStyledClassName = (args, component) => {
 		"position",
 		"data-encore-id",
 		"$size",
-		"$iconColor"
+		"$iconColor",
+		"$variant"
 	];
 	const customKeys = ["padding", "blocksize"];
 
@@ -988,7 +989,7 @@ Spicetify._getStyledClassName = (args, component) => {
 		}
 	}
 
-	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", ""];
+	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", "$hasFocus", ""];
 	const excludedPrefix = ["aria-"];
 
 	const childrenProps = ["iconLeading", "iconTrailing", "iconOnly"];
@@ -1002,7 +1003,8 @@ Spicetify._getStyledClassName = (args, component) => {
 	for (const key of booleanKeys) {
 		if (excludedKeys.includes(key)) continue;
 		if (excludedPrefix.some(prefix => key.startsWith(prefix))) continue;
-		className += `-${key}`;
+		const sanitizedKey = key.startsWith("$") ? key.slice(1) : key;
+		className += `-${sanitizedKey}`;
 	}
 
 	const customEntries = Object.entries(element).filter(
@@ -1010,7 +1012,8 @@ Spicetify._getStyledClassName = (args, component) => {
 	);
 
 	for (const [key, value] of customEntries) {
-		className += `-${key}_${value.replace(/[^a-z0-9]/gi, "_")}`;
+		const sanitizedKey = key.startsWith("$") ? key.slice(1) : key;
+		className += `-${sanitizedKey}_${value.replace(/[^a-z0-9]/gi, "_")}`;
 	}
 
 	return className;
@@ -1646,7 +1649,7 @@ Spicetify.Menu = (() => {
 		constructor(children, isEnabled, onClick, leadingIcon) {
 			super({ children, leadingIcon, onClick: (_, self) => onClick(self), shouldAdd });
 
-			this._isEnabled = isEnabled;
+			this.isEnabled = isEnabled;
 		}
 
 		setState(state) {
