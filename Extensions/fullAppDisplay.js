@@ -895,7 +895,7 @@ button.switch[disabled] {
 				func: updateVisual
 			}),
 			react.createElement(ConfigItem, {
-				name: "아티스트 아이콘 표시",
+				name: "아이콘 표시",
 				field: "icons",
 				func: updateVisual
 			}),
