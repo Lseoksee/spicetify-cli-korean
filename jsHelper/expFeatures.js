@@ -278,7 +278,7 @@ ${Spicetify.SVGIcons.search}
 
 	new Spicetify.Menu.Item(
 		"실험실 기능",
-		true,
+		false,
 		() => {
 			Spicetify.PopupModal.display({
 				title: "실험실 기능",
