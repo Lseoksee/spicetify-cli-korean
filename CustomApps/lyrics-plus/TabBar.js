@@ -205,7 +205,7 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 						items: droplistItem.map(i => options[i]).filter(Boolean),
 						switchTo: switchCallback,
 						lockIn: lockCallback
-				  })
+					})
 				: null
 		)
 	);
