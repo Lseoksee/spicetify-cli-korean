@@ -4,7 +4,7 @@ function DraggableComponent({ uri, title, children }) {
 		? react.cloneElement(children, {
 				onDragStart: dragHandler,
 				draggable: "true"
-		  })
+			})
 		: children;
 }
 
@@ -53,7 +53,7 @@ class Card extends react.Component {
 							})
 						})
 					})
-			  })
+				})
 			: Spicetify.showNotification(`<b>${this.title}</b>의 <br>${this.artist.name}</b> 을(를) 숨깁니다`);
 
 		event.stopPropagation();
