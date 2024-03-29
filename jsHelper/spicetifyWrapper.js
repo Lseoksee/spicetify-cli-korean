@@ -1771,7 +1771,7 @@ Spicetify.ContextMenu = (() => {
 let navLinkFactoryCtx = null;
 let refreshNavLinks = null;
 
-Spicetify._renderNavLinks = (list, isTouchScreenUi) => {
+Spicetify._renderNavLinks = (list, isTouchScreenUi, isPreLibX = false) => {
 	const [refreshCount, refresh] = Spicetify.React.useReducer(x => x + 1, 0);
 	refreshNavLinks = refresh;
 
@@ -1784,7 +1784,7 @@ Spicetify._renderNavLinks = (list, isTouchScreenUi) => {
 	)
 		return;
 
-	const navLinkFactory = isTouchScreenUi ? NavLinkGlobal : NavLinkSidebar;
+	const navLinkFactory = isTouchScreenUi ? NavLinkGlobal : isPreLibX ? NavLinkSidebarLegacy : NavLinkSidebar;
 
 	if (!navLinkFactoryCtx) navLinkFactoryCtx = Spicetify.React.createContext(null);
 	const registered = [];
@@ -1863,6 +1863,31 @@ const NavLink = ({ appProper, appRoutePath, icon, activeIcon }) => {
 	const NavLinkFactory = Spicetify.React.useContext(navLinkFactoryCtx);
 
 	return NavLinkFactory && Spicetify.React.createElement(NavLinkFactory, { appProper, appRoutePath, createIcon, isActive }, null);
+};
+
+const NavLinkSidebarLegacy = ({ appProper, appRoutePath, createIcon, isActive }) => {
+	return Spicetify.React.createElement(
+		"li",
+		{ className: "main-navBar-navBarItem InvalidDropTarget" },
+		Spicetify.React.createElement(
+			Spicetify.ReactComponent.TooltipWrapper,
+			{ label: appProper, placement: "right" },
+			Spicetify.React.createElement(
+				Spicetify.ReactComponent.Navigation,
+				{
+					to: appRoutePath,
+					referrer: "other",
+					className: Spicetify.classnames("link-subtle", "main-navBar-navBarLink", {
+						"main-navBar-navBarLinkActive active": isActive
+					}),
+					onClick: () => undefined,
+					"aria-label": appProper
+				},
+				createIcon(),
+				Spicetify.React.createElement(Spicetify.ReactComponent.TextComponent, { variant: "bodyMediumBold", weight: "bold" }, appProper)
+			)
+		)
+	);
 };
 
 const NavLinkSidebar = ({ appProper, appRoutePath, createIcon, isActive }) => {
@@ -2331,18 +2356,37 @@ Spicetify.Playbar = (() => {
 	if (!check_spicetify_update || !version || version === "Dev") return;
 	// Fetch latest version from GitHub
 	try {
+		let changelog;
 		const res = await fetch("https://api.github.com/repos/spicetify/spicetify-cli/releases/latest");
 		const { tag_name, html_url, body } = await res.json();
 		const semver = tag_name.slice(1);
-		const changelogRawData = body.match(/## What's Changed([\s\S]*?)\r\n\r/)[1];
-		const changelog = [...changelogRawData.matchAll(/\r\n\*\s(.+?)\sin\shttps/g)]
-			.map(match => {
-				const featureData = match[1].split("@");
-				const feature = featureData[0];
-				const committerID = featureData[1];
-				return `<li>${feature}<a href="https://github.com/${committerID}">${committerID}</a></li>`;
-			})
-			.join("\n");
+		const changelogRawDataOld = body.match(/## What's Changed([\s\S]*?)\r\n\r/)?.[1];
+		if (changelogRawDataOld) {
+			changelog = [...changelogRawDataOld.matchAll(/\r\n\*\s(.+?)\sin\shttps/g)]
+				.map(match => {
+					const featureData = match[1].split("@");
+					const feature = featureData[0];
+					const committerID = featureData[1];
+					return `<li>${feature}<a href="https://github.com/${committerID}">${committerID}</a></li>`;
+				})
+				.join("\n");
+		} else {
+			const sections = body.split("\n## ");
+			const filteredSections = sections.filter(section => !section.startsWith("Compatibility"));
+			const filteredText = filteredSections.join("\n## ");
+			changelog = [...filteredText.matchAll(/- (?:\*\*(.+?)\*\*:? )?(.+?) \(\[(.+?)\]\((.+?)\)\)/g)]
+				.map(match => {
+					const feature = match[1];
+					const description = match[2];
+					const prNumber = match[3];
+					const prLink = match[4];
+					let text = "<li>";
+					if (feature) text += `<strong>${feature}</strong>: `;
+					text += `${description} (<a href="${prLink}">${prNumber}</a>)</li>`;
+					return text;
+				})
+				.join("\n");
+		}
 
 		if (semver !== version) {
 			const korres = await fetch("https://api.github.com/repos/Lseoksee/spicetify-cli-korean/releases/latest");
