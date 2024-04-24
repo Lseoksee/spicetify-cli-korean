@@ -1001,7 +1001,7 @@ Spicetify._getStyledClassName = (args, component) => {
 		"$iconSize"
 	];
 	const customKeys = ["blocksize"];
-	const customExactKeys = ["$padding", "padding"];
+	const customExactKeys = ["$padding", "$paddingBottom", "paddingBottom", "padding"];
 
 	const element = Array.from(args).find(
 		e =>
@@ -1026,10 +1026,11 @@ Spicetify._getStyledClassName = (args, component) => {
 	const excludedKeys = ["children", "className", "style", "dir", "key", "ref", "as", "$autoMirror", "$hasFocus", ""];
 	const excludedPrefix = ["aria-"];
 
-	const childrenProps = ["iconLeading", "iconTrailing", "iconOnly"];
+	const childrenProps = ["iconLeading", "iconTrailing", "iconOnly", "$iconOnly", "$iconLeading", "$iconTrailing"];
 
 	for (const key of childrenProps) {
-		if (element[key]) className += `-${key}`;
+		const sanitizedKey = key.startsWith("$") ? key.slice(1) : key;
+		if (element[key]) className += `-${sanitizedKey}`;
 	}
 
 	const booleanKeys = Object.keys(element).filter(key => typeof element[key] === "boolean" && element[key]);
@@ -1043,9 +1044,7 @@ Spicetify._getStyledClassName = (args, component) => {
 
 	const customEntries = Object.entries(element).filter(
 		([key, value]) =>
-			(customKeys.some(k => key.toLowerCase().includes(k)) || customExactKeys.some(k => key.toLowerCase().includes(k))) &&
-			typeof value === "string" &&
-			value.length
+			(customKeys.some(k => key.toLowerCase().includes(k)) || customExactKeys.some(k => key === k)) && typeof value === "string" && value.length
 	);
 
 	for (const [key, value] of customEntries) {
