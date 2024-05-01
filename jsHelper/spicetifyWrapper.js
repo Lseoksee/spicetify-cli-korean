@@ -515,25 +515,6 @@ window.Spicetify = {
 			get Request() {
 				return Spicetify.Platform?.GraphQLLoader || Spicetify.GraphQL.Handler?.(Spicetify.GraphQL.Context);
 			},
-			get QueryDefinitions() {
-				return Object.fromEntries(
-					Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) =>
-						value.definitions.some(def => def.kind === "OperationDefinition" && def.operation === "query")
-					)
-				);
-			},
-			get MutationDefinitions() {
-				return Object.fromEntries(
-					Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) =>
-						value.definitions.some(def => def.kind === "OperationDefinition" && def.operation === "mutation")
-					)
-				);
-			},
-			get ResponseDefinitions() {
-				return Object.fromEntries(
-					Object.entries(Spicetify.GraphQL.Definitions).filter(([, value]) => value.definitions.every(def => def.kind !== "OperationDefinition"))
-				);
-			},
 			Context: functionModules.find(m => m.toString().includes("subscription") && m.toString().includes("mutation")),
 			Handler: functionModules.find(m => m.toString().includes("GraphQL subscriptions are not supported"))
 		},
@@ -566,6 +547,9 @@ window.Spicetify = {
 			Toggle: functionModules.find(m => m.toString().includes("onSelected") && m.toString().includes('type:"checkbox"')),
 			Cards: {
 				Default: reactComponentsUI.Card,
+				FeatureCard: functionModules.find(
+					m => m.toString().includes("?highlight") && m.toString().includes("headerText") && m.toString().includes("imageContainer")
+				),
 				Hero: functionModules.find(m => m?.toString().includes('"herocard-click-handler"')),
 				CardImage: reactComponentsUI.CardImage,
 				...Object.fromEntries(cards)
