@@ -1947,7 +1947,7 @@ const NavLinkSidebar = ({ appProper, appRoutePath, createIcon, isActive }) => {
 				{
 					to: appRoutePath,
 					referrer: "other",
-					className: Spicetify.classnames("link-subtle", "main-yourLibraryX-navLink", {
+					className: Spicetify.classnames("link-subtle main-yourLibraryX-navLink", {
 						"main-yourLibraryX-navLinkActive": isActive
 					}),
 					onClick: () => undefined,
