@@ -74,7 +74,7 @@ const CONFIG = {
 		},
 		lrclib: {
 			on: getConfig("lyrics-plus:provider:lrclib:on"),
-			desc: "Lyrics sourced from lrclib.net. Supports both synced and unsynced lyrics. LRCLIB is a free and open-source lyrics provider.",
+			desc: "LRCLIB는 오픈소스 가사 제공 서비스 입니다. 실시간 가사, 일반가사 모두 지원합니다",
 			modes: [SYNCED, UNSYNCED]
 		},
 		genius: {
