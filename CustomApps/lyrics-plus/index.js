@@ -72,6 +72,11 @@ const CONFIG = {
 			desc: "중국에서 운영하는 실시간 가사 서비스입니다. (정확도 떨어짐)",
 			modes: [KARAOKE, SYNCED, UNSYNCED]
 		},
+		lrclib: {
+			on: getConfig("lyrics-plus:provider:lrclib:on"),
+			desc: "Lyrics sourced from lrclib.net. Supports both synced and unsynced lyrics. LRCLIB is a free and open-source lyrics provider.",
+			modes: [SYNCED, UNSYNCED]
+		},
 		genius: {
 			on: spotifyVersion >= "1.2.31" ? false : getConfig("lyrics-plus:provider:genius:on"),
 			desc: "가장 완벽한 일반가사를 지원합니다. <code>1.2.31</code> 버전 이상에서는 사용할 수 없습니다.",
