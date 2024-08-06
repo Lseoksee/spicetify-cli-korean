@@ -186,7 +186,7 @@ func colorVariableReplace(content string) string {
 	utils.Replace(&content, "#121212", func(submatches ...string) string {
 		return "var(--spice-main)"
 	})
-	utils.Replace(&content, "#242424", func(submatches ...string) string {
+	utils.Replace(&content, `#(242424|1f1f1f)`, func(submatches ...string) string {
 		return "var(--spice-main-elevated)"
 	})
 
@@ -306,8 +306,12 @@ func colorVariableReplaceForJS(content string) string {
 }
 
 func disableSentry(input string) string {
-	utils.Replace(&input, `(\("[^"]+sentry.io)/`, func(submatches ...string) string {
-		return fmt.Sprintf(",%s", submatches[0])
+	//utils.Replace(&input, `\(([^,]+),([^,]+),\{sampleRate:([^,]+),tracesSampleRate:([^,]+)(,.*?)?\}`, func(submatches ...string) string {
+	//	return fmt.Sprintf(",%s", submatches[0])
+	//})
+	// Spotify enables sentry only for versions that are newer than 30 days old.
+	utils.Replace(&input, "/864e5<30", func(submatches ...string) string {
+		return "<0"
 	})
 	return input
 }
@@ -615,13 +619,6 @@ func exposeAPIs_vendor(input string) string {
 				1)
 		}
 	}
-
-	utils.ReplaceOnce(
-		&input,
-		`\(function\(\w+\)\{return \w+\.\$?variant\?function\(\w+\)\{`,
-		func(submatches ...string) string {
-			return fmt.Sprintf("Spicetify._fontStyle=%s", submatches[0])
-		})
 
 	// Mapping styled-components classes
 	utils.Replace(
