@@ -115,7 +115,7 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 		["karaoke", "노래방"],
 		["synced", "실시간가사"],
 		["unsynced", "가사"],
-		["genius", "Genius"]
+		["genius", "Genius"],
 	]);
 
 	const options = [];
@@ -206,7 +206,7 @@ const TabBar = react.memo(({ links, activeLink, lockLink, switchCallback, lockCa
 						items: droplistItem.map((i) => options[i]).filter(Boolean),
 						switchTo: switchCallback,
 						lockIn: lockCallback,
-					})
+				  })
 				: null
 		)
 	);

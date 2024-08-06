@@ -3,7 +3,7 @@ const ButtonSVG = ({ icon, active = true, onClick }) => {
 		"button",
 		{
 			className: `switch${active ? "" : " disabled"}`,
-			onClick
+			onClick,
 		},
 		react.createElement("svg", {
 			width: 16,
@@ -11,8 +11,8 @@ const ButtonSVG = ({ icon, active = true, onClick }) => {
 			viewBox: "0 0 16 16",
 			fill: "currentColor",
 			dangerouslySetInnerHTML: {
-				__html: icon
-			}
+				__html: icon,
+			},
 		})
 	);
 };
@@ -22,7 +22,7 @@ const ButtonText = ({ text, active = true, onClick }) => {
 		"button",
 		{
 			className: `text${active ? "" : " disabled"}`,
-			onClick
+			onClick,
 		},
 		text
 	);
@@ -40,24 +40,24 @@ const ConfigSlider = ({ name, defaultValue, onChange = () => {} }) => {
 	return react.createElement(
 		"div",
 		{
-			className: "setting-row"
+			className: "setting-row",
 		},
 		react.createElement(
 			"label",
 			{
-				className: "col description"
+				className: "col description",
 			},
 			name
 		),
 		react.createElement(
 			"div",
 			{
-				className: "col action"
+				className: "col action",
 			},
 			react.createElement(ButtonSVG, {
 				icon: Spicetify.SVGIcons.check,
 				active,
-				onClick: toggleState
+				onClick: toggleState,
 			})
 		)
 	);
@@ -67,7 +67,7 @@ const ConfigSelection = ({ name, defaultValue, options, onChange = () => {} }) =
 	const [value, setValue] = useState(defaultValue);
 
 	const setValueCallback = useCallback(
-		event => {
+		(event) => {
 			const value = event.target.value;
 			setValue(value);
 			onChange(value);
@@ -78,31 +78,31 @@ const ConfigSelection = ({ name, defaultValue, options, onChange = () => {} }) =
 	return react.createElement(
 		"div",
 		{
-			className: "setting-row"
+			className: "setting-row",
 		},
 		react.createElement(
 			"label",
 			{
-				className: "col description"
+				className: "col description",
 			},
 			name
 		),
 		react.createElement(
 			"div",
 			{
-				className: "col action"
+				className: "col action",
 			},
 			react.createElement(
 				"select",
 				{
 					value,
-					onChange: setValueCallback
+					onChange: setValueCallback,
 				},
-				Object.keys(options).map(item =>
+				Object.keys(options).map((item) =>
 					react.createElement(
 						"option",
 						{
-							value: item
+							value: item,
 						},
 						options[item]
 					)
@@ -116,7 +116,7 @@ const ConfigInput = ({ name, defaultValue, onChange = () => {} }) => {
 	const [value, setValue] = useState(defaultValue);
 
 	const setValueCallback = useCallback(
-		event => {
+		(event) => {
 			const value = event.target.value;
 			setValue(value);
 			onChange(value);
@@ -127,23 +127,23 @@ const ConfigInput = ({ name, defaultValue, onChange = () => {} }) => {
 	return react.createElement(
 		"div",
 		{
-			className: "setting-row"
+			className: "setting-row",
 		},
 		react.createElement(
 			"label",
 			{
-				className: "col description"
+				className: "col description",
 			},
 			name
 		),
 		react.createElement(
 			"div",
 			{
-				className: "col action"
+				className: "col action",
 			},
 			react.createElement("input", {
 				value,
-				onChange: setValueCallback
+				onChange: setValueCallback,
 			})
 		)
 	);
@@ -151,7 +151,7 @@ const ConfigInput = ({ name, defaultValue, onChange = () => {} }) => {
 
 const OptionList = ({ items, onChange }) => {
 	const [_, setItems] = useState(items);
-	return items.map(item => {
+	return items.map((item) => {
 		if (!item.when()) {
 			return;
 		}
@@ -159,10 +159,10 @@ const OptionList = ({ items, onChange }) => {
 			name: item.desc,
 			defaultValue: item.defaultValue,
 			options: item.options,
-			onChange: value => {
+			onChange: (value) => {
 				onChange(item.key, value);
 				setItems([...items]);
-			}
+			},
 		});
 	});
 };
@@ -171,7 +171,7 @@ function openConfig() {
 	const configContainer = react.createElement(
 		"div",
 		{
-			id: `${APP_NAME}-config-container`
+			id: `${APP_NAME}-config-container`,
 		},
 		react.createElement(OptionList, {
 			items: [
@@ -184,65 +184,65 @@ function openConfig() {
 						30: "30 일",
 						60: "60 일",
 						90: "90 일",
-						120: "120 일"
+						120: "120 일",
 					},
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "표기언어",
 					key: "locale",
 					defaultValue: CONFIG.locale,
 					type: ConfigInput,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "상대적시간",
 					key: "relative",
 					defaultValue: CONFIG.relative,
 					type: ConfigSlider,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "유형",
 					key: "visual:type",
 					defaultValue: CONFIG.visual.type,
 					type: ConfigSlider,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "곡 개수",
 					key: "visual:count",
 					defaultValue: CONFIG.visual.count,
 					type: ConfigSlider,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "새 팟캐스트",
 					key: "podcast",
 					defaultValue: CONFIG.podcast,
 					type: ConfigSlider,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: "새 음악",
 					key: "music",
 					defaultValue: CONFIG.music,
 					type: ConfigSlider,
-					when: () => true
+					when: () => true,
 				},
 				{
 					desc: Spicetify.Locale.get("artist.albums"),
 					key: "album",
 					defaultValue: CONFIG.album,
 					type: ConfigSlider,
-					when: () => CONFIG.music
+					when: () => CONFIG.music,
 				},
 				{
 					desc: Spicetify.Locale.get("artist.singles"),
 					key: "single-ep",
 					defaultValue: CONFIG["single-ep"],
 					type: ConfigSlider,
-					when: () => CONFIG.music
+					when: () => CONFIG.music,
 				},
 				/* {
 					desc: Spicetify.Locale.get("artist.appears-on"),
@@ -256,8 +256,8 @@ function openConfig() {
 					key: "compilations",
 					defaultValue: CONFIG.compilations,
 					type: ConfigSlider,
-					when: () => CONFIG.music
-				}
+					when: () => CONFIG.music,
+				},
 			],
 			onChange: (name, value) => {
 				const subs = name.split(":");
@@ -268,28 +268,28 @@ function openConfig() {
 					CONFIG[name] = value;
 				}
 				localStorage.setItem(`${APP_NAME}:${name}`, value);
-			}
+			},
 		}),
 		react.createElement(
 			"div",
 			{
-				className: "setting-row"
+				className: "setting-row",
 			},
 			react.createElement(
 				"label",
 				{
-					className: "col description"
+					className: "col description",
 				},
 				"숨겨진 항목 재설정"
 			),
 			react.createElement(
 				"div",
 				{
-					className: "col action"
+					className: "col action",
 				},
 				react.createElement(ButtonText, {
 					text: Spicetify.Locale.get("equalizer.reset"),
-					onClick: removeCards.bind(this, null, "reset")
+					onClick: removeCards.bind(this, null, "reset"),
 				})
 			)
 		)
@@ -297,6 +297,6 @@ function openConfig() {
 
 	Spicetify.PopupModal.display({
 		title: Spicetify.Locale.get("new_releases"),
-		content: configContainer
+		content: configContainer,
 	});
 }
