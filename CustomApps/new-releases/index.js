@@ -269,8 +269,14 @@ class Grid extends react.Component {
 }
 
 async function getArtistList() {
-	const base = await Spicetify.Platform.LibraryAPI.getArtists();
-	const artists = await Spicetify.Platform.LibraryAPI.getArtists({ limit: base.totalLength });
+	const config = {
+		filters: ["1"],
+		sortOrder: ["0"],
+		textFilter: "",
+		offset: 0,
+		limit: 50000,
+	};
+	const artists = await Spicetify.Platform.LibraryAPI.getContents(config);
 	count(true);
 	return artists.items ?? [];
 }
