@@ -319,8 +319,6 @@ window.Spicetify = {
 			Spicetify.Platform[key] = _platform[key];
 		}
 	}
-
-	if (!Spicetify.Platform.Registry) Spicetify.Events.platformLoaded.fire();
 })();
 
 (function addMissingPlatformAPIs() {
@@ -344,8 +342,6 @@ window.Spicetify = {
 		Spicetify.Platform[symbolName] = resolvedAPI;
 		console.debug(`[spicetifyWrapper] Resolved PlatformAPI from Registry: ${symbolName}`);
 	}
-
-	if (Spicetify.Events.platformLoaded.callbacks.length) Spicetify.Events.platformLoaded.fire();
 })();
 
 (async function addProxyCosmos() {
@@ -469,15 +465,18 @@ window.Spicetify = {
 		// Filter out non-webpack scripts
 		.filter((script) => ["extensions", "spicetify", "helper", "theme"].every((str) => !script.src?.includes(str)));
 
+	//console.time("sanitize");
 	await Promise.all(
 		scripts.map(async (script) => {
 			try {
 				const res = await fetch(script.src);
 				const text = await res.text();
+				// remove every string from the content
+				const sanitizedText = text.replace(/(["'`])(?:\\.|[^\\\1])*?\1/g, "");
 				const src = script.src.split("/").pop();
 				console.log(`[spicetifyWrapper] Waiting for ${src}`);
-				for (const pack of text.match(/(?:,|{)(\d+): ?\(.,.,./g).map((str) => str.slice(0, -7).slice(1))) {
-					// console.debug(`[spicetifyWrapper] Waiting for ${pack} of ${src}`);
+				for (const pack of sanitizedText.match(/(?<!["'`])(?:,|{)(\d+): ?\(.,.,./g).map((str) => str.slice(0, -7).slice(1))) {
+					//console.debug(`[spicetifyWrapper] Waiting for ${pack} of ${src}`);
 					while (!require.m || !Object.keys(require.m).includes(pack)) {
 						await new Promise((r) => setTimeout(r, 100));
 					}
@@ -489,8 +488,12 @@ window.Spicetify = {
 		})
 	).then(() => {
 		console.log("[spicetifyWrapper] All required webpack modules loaded");
+		//console.timeEnd("sanitize");
 		chunks = Object.entries(require.m);
 		cache = Object.keys(require.m).map((id) => require(id));
+
+		// Fire platformLoaded event there because of the sleep functions before
+		Spicetify.Events.platformLoaded.fire();
 	});
 
 	const modules = cache
