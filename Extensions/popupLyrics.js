@@ -270,15 +270,15 @@ function PopupLyrics() {
 			});
 
 			if (body.status !== 200) {
-				return { error: "Request error: Track wasn't found" };
+				return { error: "요청오류: 트랙을 찾을 수 없습니다." };
 			}
 
 			const meta = await body.json();
 			if (meta?.instrumental) {
-				return { error: "Instrumental" };
+				return { error: "♪ 전주곡 ♪" };
 			}
 			if (!meta?.syncedLyrics) {
-				return { error: "No synced lyrics" };
+				return { error: "실시간가사 없음" };
 			}
 
 			// Preprocess lyrics by removing [tags] and empty lines
@@ -335,7 +335,7 @@ function PopupLyrics() {
 			lrclib: {
 				on: boolLocalStorage("popup-lyrics:services:lrclib:on"),
 				call: LyricProviders.fetchLrclib,
-				desc: "Lyrics sourced from lrclib.net. Supports both synced and unsynced lyrics. LRCLIB is a free and open-source lyrics provider.",
+				desc: "LRCLIB는 오픈소스 가사 제공 서비스 입니다. 실시간 가사, 일반가사 모두 지원합니다.",
 			},
 		},
 		servicesOrder: [],
