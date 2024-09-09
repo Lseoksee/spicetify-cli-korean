@@ -1019,6 +1019,21 @@ Spicetify.Events = (() => {
 		Spicetify.Platform.UserAPI._product_state_service = productStateApi;
 	})();
 
+	(async function setButtonsHeight() {
+		while (!Spicetify.CosmosAsync) {
+			await new Promise((res) => setTimeout(res, 100));
+		}
+		const expFeatures = JSON.parse(localStorage.getItem("spicetify-exp-features") || "{}");
+		const isGlobalNavbar = expFeatures?.enableGlobalNavBar?.value;
+
+		if (typeof isGlobalNavbar !== "undefined" && isGlobalNavbar === "control") {
+			await Spicetify.CosmosAsync.post("sp://messages/v1/container/control", {
+				type: "update_titlebar",
+				height: Spicetify.Platform.PlatformData.os_name === "osx" ? "42" : "40",
+			});
+		}
+	})();
+
 	setInterval(() => {
 		if (playerState.cache?.isPaused === false) {
 			const event = new Event("onprogress");
@@ -1838,7 +1853,7 @@ Spicetify.ContextMenu = (() => {
 let navLinkFactoryCtx = null;
 let refreshNavLinks = null;
 
-Spicetify._renderNavLinks = (list, isTouchScreenUi, isPreLibX = false) => {
+Spicetify._renderNavLinks = (list, isTouchScreenUi) => {
 	const [refreshCount, refresh] = Spicetify.React.useReducer((x) => x + 1, 0);
 	refreshNavLinks = refresh;
 
@@ -1851,7 +1866,7 @@ Spicetify._renderNavLinks = (list, isTouchScreenUi, isPreLibX = false) => {
 	)
 		return;
 
-	const navLinkFactory = isTouchScreenUi ? NavLinkGlobal : isPreLibX ? NavLinkSidebarLegacy : NavLinkSidebar;
+	const navLinkFactory = isTouchScreenUi ? NavLinkGlobal : NavLinkSidebar;
 
 	if (!navLinkFactoryCtx) navLinkFactoryCtx = Spicetify.React.createContext(null);
 	const registered = [];
@@ -1934,31 +1949,6 @@ const NavLink = ({ appProper, appRoutePath, icon, activeIcon }) => {
 	const NavLinkFactory = Spicetify.React.useContext(navLinkFactoryCtx);
 
 	return NavLinkFactory && Spicetify.React.createElement(NavLinkFactory, { appProper, appRoutePath, createIcon, isActive }, null);
-};
-
-const NavLinkSidebarLegacy = ({ appProper, appRoutePath, createIcon, isActive }) => {
-	return Spicetify.React.createElement(
-		"li",
-		{ className: "main-navBar-navBarItem InvalidDropTarget" },
-		Spicetify.React.createElement(
-			Spicetify.ReactComponent.TooltipWrapper,
-			{ label: appProper, placement: "right" },
-			Spicetify.React.createElement(
-				Spicetify.ReactComponent.Navigation,
-				{
-					to: appRoutePath,
-					referrer: "other",
-					className: Spicetify.classnames("link-subtle", "main-navBar-navBarLink", {
-						"main-navBar-navBarLinkActive active": isActive,
-					}),
-					onClick: () => undefined,
-					"aria-label": appProper,
-				},
-				createIcon(),
-				Spicetify.React.createElement(Spicetify.ReactComponent.TextComponent, { variant: "mestoBold" }, appProper)
-			)
-		)
-	);
 };
 
 const NavLinkSidebar = ({ appProper, appRoutePath, createIcon, isActive }) => {

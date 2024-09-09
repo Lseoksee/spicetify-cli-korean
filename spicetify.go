@@ -150,6 +150,22 @@ func main() {
 		}
 		return
 
+	case "spotify-updates":
+		commands = commands[1:]
+		if len(commands) == 0 {
+			utils.PrintError("No parameter given. It has to be \"block\" or \"unblock\".")
+			return
+		}
+		param := commands[0]
+		if param == "block" {
+			cmd.BlockSpotifyUpdates(true)
+		} else if param == "unblock" {
+			cmd.BlockSpotifyUpdates(false)
+		} else {
+			utils.PrintError("Invalid parameter. It has to be \"block\" or \"unblock\".")
+		}
+		return
+
 	case "path":
 		commands = commands[1:]
 		path, err := (func() (string, error) {
@@ -355,6 +371,8 @@ watch               Enter watch mode.
 restart             Restart Spotify client.
 
 ` + utils.Bold("NON-CHAINABLE COMMANDS") + `
+spotify-updates       Blocks Spotify updates. Patches spotify executable. Accepts "block" or "unblock" as parameter.
+
 path                Prints path of Spotify's executable, userdata, and more.
                     1. Print executable path:
                     spicetify path
@@ -380,7 +398,6 @@ path                Prints path of Spotify's executable, userdata, and more.
 
                     "-c" (for config.ini)
                     options: N/A.
-
 
 config              1. Print all config fields and values:
                     spicetify config

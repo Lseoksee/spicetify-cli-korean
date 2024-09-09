@@ -59,11 +59,7 @@ func InitPaths() {
 
 	spotifyPath = utils.ReplaceEnvVarsInString(spotifyPath)
 	prefsPath = utils.ReplaceEnvVarsInString(prefsPath)
-	testPath := spotifyPath
-
-	if runtime.GOOS == "windows" {
-		testPath = filepath.Join(spotifyPath, "Spotify.exe")
-	}
+	testPath := filepath.Join(spotifyPath, "Apps")
 
 	if _, err := os.Stat(testPath); err != nil {
 		actualSpotifyPath := utils.FindAppPath()
