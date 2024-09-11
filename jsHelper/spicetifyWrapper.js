@@ -450,6 +450,17 @@ window.Spicetify = {
 	// Force all webpack modules to load
 	const require = webpackChunkclient_web.push([[Symbol()], {}, (re) => re]);
 	while (!require.m) await new Promise((r) => setTimeout(r, 50));
+	console.log("[spicetifyWrapper] Waiting for required webpack modules to load");
+	let webpackDidCallback = false;
+	// https://github.com/webpack/webpack/blob/main/lib/runtime/OnChunksLoadedRuntimeModule.js
+	require.O(
+		null,
+		[],
+		() => {
+			webpackDidCallback = true;
+		},
+		6
+	);
 
 	let chunks = Object.entries(require.m);
 	let cache = Object.keys(require.m).map((id) => require(id));
@@ -457,44 +468,13 @@ window.Spicetify = {
 	// For _renderNavLinks to work
 	Spicetify.React = cache.find((m) => m?.useMemo);
 
-	// Get all script tags matching root directory
-	// Some link tags modules are not included in require.m/unused
-	const scripts = [...document.querySelectorAll("script")]
-		// Get scripts from root dir
-		.filter((script) => script.src?.includes("xpui.app.spotify.com"))
-		// Filter out non-webpack scripts
-		.filter((script) => ["extensions", "spicetify", "helper", "theme"].every((str) => !script.src?.includes(str)));
-
-	//console.time("sanitize");
-	await Promise.all(
-		scripts.map(async (script) => {
-			try {
-				const res = await fetch(script.src);
-				const text = await res.text();
-				// remove every string from the content
-				const sanitizedText = text.replace(/(["'`])(?:\\.|[^\\\1])*?\1/g, "");
-				const src = script.src.split("/").pop();
-				console.log(`[spicetifyWrapper] Waiting for ${src}`);
-				for (const pack of sanitizedText.match(/(?<!["'`])(?:,|{)(\d+): ?\(.,.,./g).map((str) => str.slice(0, -7).slice(1))) {
-					//console.debug(`[spicetifyWrapper] Waiting for ${pack} of ${src}`);
-					while (!require.m || !Object.keys(require.m).includes(pack)) {
-						await new Promise((r) => setTimeout(r, 100));
-					}
-				}
-				console.log(`[spicetifyWrapper] Loaded ${src}`);
-			} catch (e) {
-				return console.error(e);
-			}
-		})
-	).then(() => {
-		console.log("[spicetifyWrapper] All required webpack modules loaded");
-		//console.timeEnd("sanitize");
-		chunks = Object.entries(require.m);
-		cache = Object.keys(require.m).map((id) => require(id));
-
-		// Fire platformLoaded event there because of the sleep functions before
-		Spicetify.Events.platformLoaded.fire();
-	});
+	while (!webpackDidCallback) {
+		await new Promise((r) => setTimeout(r, 100));
+	}
+	console.log("[spicetifyWrapper] All required webpack modules loaded");
+	chunks = Object.entries(require.m);
+	cache = Object.keys(require.m).map((id) => require(id));
+	Spicetify.Events.platformLoaded.fire();
 
 	const modules = cache
 		.filter((module) => typeof module === "object")
@@ -2080,11 +2060,12 @@ Object.defineProperty(Spicetify, "TippyProps", {
 });
 
 Spicetify.Topbar = (() => {
+	let leftGeneratedClassName;
+	let rightGeneratedClassName;
 	let leftContainer;
 	let rightContainer;
 	const leftButtonsStash = new Set();
 	const rightButtonsStash = new Set();
-	const generatedClassName = "Button-medium-medium-buttonTertiary-iconOnly-condensed-disabled-isUsingKeyboard-useBrowserDefaultFocusStyle";
 
 	class Button {
 		constructor(label, icon, onClick, disabled = false, isRight = false) {
@@ -2100,19 +2081,12 @@ Spicetify.Topbar = (() => {
 			this.label = label;
 
 			this.element.appendChild(this.button);
-			const globalHistoryButtons = document.querySelector(".main-globalNav-historyButtons");
 			if (isRight) {
-				this.button.classList.add("encore-over-media-set", "main-topBar-buddyFeed");
-				if (globalHistoryButtons) this.button.classList.add("main-globalNav-buddyFeed");
-
+				this.button.className = rightGeneratedClassName;
 				rightButtonsStash.add(this.element);
 				rightContainer?.prepend(this.element);
 			} else {
-				this.button.classList.add("main-topBar-button");
-				if (globalHistoryButtons) {
-					this.button.classList.add("main-globalNav-icon", generatedClassName);
-				}
-
+				this.button.className = leftGeneratedClassName;
 				leftButtonsStash.add(this.element);
 				leftContainer?.append(this.element);
 			}
@@ -2156,9 +2130,15 @@ Spicetify.Topbar = (() => {
 
 	function waitForTopbarMounted() {
 		const globalHistoryButtons = document.querySelector(".main-globalNav-historyButtons");
+		leftGeneratedClassName = document.querySelector(
+			".main-topBar-historyButtons .main-topBar-button, .main-globalNav-historyButtons .main-globalNav-icon"
+		)?.className;
+		rightGeneratedClassName = document.querySelector(
+			".main-topBar-container .main-topBar-buddyFeed, .main-actionButtons .main-topBar-buddyFeed, .main-actionButtons .main-globalNav-buddyFeed"
+		)?.className;
 		leftContainer = document.querySelector(".main-topBar-historyButtons") ?? globalHistoryButtons;
 		rightContainer = document.querySelector(".main-actionButtons");
-		if (!leftContainer || !rightContainer) {
+		if (!leftContainer || !rightContainer || !leftGeneratedClassName || !rightGeneratedClassName) {
 			setTimeout(waitForTopbarMounted, 100);
 			return;
 		}
@@ -2168,19 +2148,14 @@ Spicetify.Topbar = (() => {
 			if (button.parentNode) button.parentNode.removeChild(button);
 
 			const buttonElement = button.querySelector("button");
-			if (globalHistoryButtons) {
-				buttonElement.classList.add("main-globalNav-icon", generatedClassName);
-			} else {
-				buttonElement.classList.remove("main-globalNav-icon", generatedClassName);
-			}
+			buttonElement.className = leftGeneratedClassName;
 		}
 		leftContainer.append(...leftButtonsStash);
 		for (const button of rightButtonsStash) {
 			if (button.parentNode) button.parentNode.removeChild(button);
 
 			const buttonElement = button.querySelector("button");
-			if (globalHistoryButtons) buttonElement.classList.add("main-globalNav-buddyFeed");
-			else buttonElement.classList.remove("main-globalNav-buddyFeed");
+			buttonElement.className = rightGeneratedClassName;
 		}
 		rightContainer.prepend(...rightButtonsStash);
 	}
