@@ -667,13 +667,13 @@ function openConfig() {
 		react.createElement("span", {
 			dangerouslySetInnerHTML: {
 				__html:
-					"Use this to bypass CORS restrictions. Replace the URL with your cors proxy server of your choice. <code>{url}</code> will be replaced with the request URL.",
+					"CORS 제한을 우회하기 위해 사용합니다. 아래 URL을 수정하여 CORS 프록시 서버를 변경합니다. <code>{url}</code>은 요청 URL로 대체됩니다.",
 			},
 		}),
 		react.createElement(corsProxyTemplate),
 		react.createElement("span", {
 			dangerouslySetInnerHTML: {
-				__html: "Spotify will reload its webview after applying. Leave empty to restore default: <code>https://cors-proxy.spicetify.app/{url}</code>",
+				__html: "적용 후 Spotify가 웹뷰를 다시 로드합니다. 값을 비워두면 기본값으로 대체됩니다: <code>https://cors-proxy.spicetify.app/{url}</code>",
 			},
 		})
 	);
