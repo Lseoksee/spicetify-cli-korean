@@ -92,6 +92,13 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 			none: "없음",
 		};
 
+		const savedTranslationDisplay = localStorage.getItem(`${APP_NAME}:visual:translate:display-mode`) || "replace";
+		CONFIG.visual["translate:display-mode"] = savedTranslationDisplay;
+		const translationDisplayOptions = {
+			replace: "Replace original",
+			below: "Below original",
+		};
+
 		const languageOptions = {
 			off: "기본값",
 			"zh-hans": "중국어 (간체)",
@@ -100,12 +107,18 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 			ko: "한국어",
 		};
 
-		let modeOptions = {};
+		let modeOptions = {
+			none: "None",
+		};
 
 		if (hasTranslation.musixmatch) {
+			const selectedLanguage = CONFIG.visual["musixmatch-translation-language"];
+			const languageName = new Intl.DisplayNames([selectedLanguage], {
+				type: "language",
+			}).of(selectedLanguage);
 			sourceOptions = {
 				...sourceOptions,
-				musixmatchTranslation: "영어 (Musixmatch)",
+				musixmatchTranslation: `${languageName} (Musixmatch)`,
 			};
 		}
 
@@ -149,6 +162,19 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 				key: "translate:translated-lyrics-source",
 				type: ConfigSelection,
 				options: sourceOptions,
+				renderInline: true,
+			},
+			{
+				desc: "가사 번역하기",
+				key: "translate:display-mode",
+				type: ConfigSelection,
+				onChange: (name, value) => {
+					CONFIG.visual[name] = value;
+					localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
+					lyricContainerUpdate?.();
+				},
+				options: translationDisplayOptions,
+				defaultValue: savedTranslationDisplay,
 				renderInline: true,
 			},
 			{
