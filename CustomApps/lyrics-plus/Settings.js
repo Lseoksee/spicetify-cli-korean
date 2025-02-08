@@ -644,8 +644,8 @@ function openConfig() {
 					step: thresholdSizeLimit.step,
 				},
 				{
-					desc: "Musixmatch Translation Language.",
-					info: "Choose the language you want to translate the lyrics to. Changes will take effect after the next track.",
+					desc: "Musixmatch 번역",
+					info: "Musixmatch 제공자를 사용하는경우, 원하는 언어로 번역해 보세요 다음 트랙부터 적용됩니다.",
 					key: "musixmatch-translation-language",
 					type: ConfigSelection,
 					options: languageOptions,
