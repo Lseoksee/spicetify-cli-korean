@@ -420,7 +420,7 @@ class LyricsContainer extends react.Component {
 	async translateLyrics(silent = true) {
 		function showNotification(timeout) {
 			if (silent) return;
-			Spicetify.showNotification("Translating...", false, timeout);
+			Spicetify.showNotification("변환중...", false, timeout);
 		}
 
 		const lyrics = this.state.currentLyrics;
