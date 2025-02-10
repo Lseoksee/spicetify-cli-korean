@@ -95,8 +95,8 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 		const savedTranslationDisplay = localStorage.getItem(`${APP_NAME}:visual:translate:display-mode`) || "replace";
 		CONFIG.visual["translate:display-mode"] = savedTranslationDisplay;
 		const translationDisplayOptions = {
-			replace: "Replace original",
-			below: "Below original",
+			replace: "기존 가사 대체",
+			below: "기존 가사 하단에",
 		};
 
 		const languageOptions = {
@@ -165,7 +165,7 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 				renderInline: true,
 			},
 			{
-				desc: "가사 번역하기",
+				desc: "변역 방식",
 				key: "translate:display-mode",
 				type: ConfigSelection,
 				onChange: (name, value) => {
