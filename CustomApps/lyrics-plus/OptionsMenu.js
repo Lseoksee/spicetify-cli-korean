@@ -187,7 +187,7 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 				when: () => friendlyLanguage,
 			},
 			{
-				desc: "변환하기",
+				desc: "변환 하기",
 				key: "translate",
 				type: ConfigSlider,
 				trigger: "click",
