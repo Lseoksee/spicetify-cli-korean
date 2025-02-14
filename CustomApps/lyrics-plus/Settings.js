@@ -684,7 +684,7 @@ function openConfig() {
 				},
 				{
 					desc: "메모리 케시 비우기",
-					info: "불러온 가사는 빠른 재로딩을 위하여 메모리에 케싱하고 있습니다. Spotify를 다시 시작하지 않고도 메모리에서 캐시된 가사를 지우려면 이 버튼을 누르세요.",
+					info: "불러온 가사는 빠른 재로딩을 위하여 메모리에 캐싱하고 있습니다. Spotify를 다시 시작하지 않고도 메모리에서 캐시된 가사를 지우려면 이 버튼을 누르세요.",
 					key: "clear-memore-cache",
 					text: "메모리 케시 비우기",
 					type: ConfigButton,
