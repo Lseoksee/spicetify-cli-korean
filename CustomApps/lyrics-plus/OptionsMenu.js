@@ -163,14 +163,14 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 				renderInline: true,
 			},
 			{
-				desc: "변역 방식",
+				desc: "보기 방식",
 				key: "translate:display-mode",
 				type: ConfigSelection,
 				options: translationDisplayOptions,
 				renderInline: true,
 			},
 			{
-				desc: "언어 바꾸기",
+				desc: "변환 언어",
 				key: "translate:detect-language-override",
 				type: ConfigSelection,
 				options: languageOptions,
@@ -179,7 +179,7 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation }) => {
 				when: () => friendlyLanguage,
 			},
 			{
-				desc: "모드",
+				desc: "변환 모드",
 				key: `translation-mode:${friendlyLanguage}`,
 				type: ConfigSelection,
 				options: modeOptions,
