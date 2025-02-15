@@ -552,7 +552,7 @@ const languageCodes =
 		","
 	);
 
-const displayNames = new Intl.DisplayNames(["en"], { type: "language" });
+const displayNames = new Intl.DisplayNames(["ko"], { type: "language" });
 const languageOptions = languageCodes.reduce((acc, code) => {
 	acc[code] = code === "none" ? "None" : displayNames.of(code);
 	return acc;
