@@ -25,6 +25,8 @@ if (!navigator.serviceWorker) {
 	PopupLyrics();
 }
 
+let CACHE = {};
+
 function PopupLyrics() {
 	const { Player, CosmosAsync, LocalStorage, ContextMenu } = Spicetify;
 
@@ -324,7 +326,7 @@ function PopupLyrics() {
 			musixmatch: {
 				on: boolLocalStorage("popup-lyrics:services:musixmatch:on"),
 				call: LyricProviders.fetchMusixmatch,
-				desc: `Spotify와 완벽하게 호환이 됩니다. 원활하게 가사를 불러오려면 하단 값을 <a href="https://spicetify.app/docs/faq#sometimes-popup-lyrics-andor-lyrics-plus-seem-to-not-work">해당 문서를 참조하여</a> 얻은 토큰 값으로 수정해 주세요.`,
+				desc: "Spotify와 완벽하게 호환이 됩니다. 가사를 원활하게 불러오지 못할 경우 <code>토큰 초기화</code> 버튼을 눌러주세요.",
 				token: LocalStorage.get("popup-lyrics:services:musixmatch:token") || "2005218b74f939209bda92cb633c7380612e14cb7fe92dcd6a780f",
 			},
 			spotify: {
@@ -421,9 +423,11 @@ function PopupLyrics() {
 
 	let sharedData = {};
 
-	Player.addEventListener("songchange", updateTrack);
+	Player.addEventListener("songchange", () => {
+		updateTrack();
+	});
 
-	async function updateTrack() {
+	async function updateTrack(refresh = false) {
 		if (!lyricVideoIsOpen) {
 			return;
 		}
@@ -443,20 +447,26 @@ function PopupLyrics() {
 			uri: Player.data.item.uri,
 		};
 
-		for (const name of userConfigs.servicesOrder) {
-			const service = userConfigs.services[name];
-			if (!service.on) continue;
-			sharedData = { lyrics: [] };
+		if (CACHE?.[info.uri]?.lyrics?.length && !refresh) {
+			sharedData = CACHE[info.uri];
+		} else {
+			for (const name of userConfigs.servicesOrder) {
+				const service = userConfigs.services[name];
+				if (!service.on) continue;
+				sharedData = { lyrics: [] };
 
-			try {
-				const data = await service.call(info);
-				console.log(data);
-				sharedData = data;
-				if (!sharedData.error) {
-					return;
+				try {
+					const data = await service.call(info);
+					console.log(data);
+					sharedData = data;
+					CACHE[info.uri] = sharedData;
+
+					if (!sharedData.error) {
+						return;
+					}
+				} catch (err) {
+					sharedData = { error: "가사없음" };
 				}
-			} catch (err) {
-				sharedData = { error: "가사없음" };
 			}
 		}
 	}
@@ -815,11 +825,20 @@ function PopupLyrics() {
 
 	function openConfig(event) {
 		event.preventDefault();
-		if (!configContainer) {
+
+		// Reset on reopen
+		if (configContainer) {
+			resetTokenButton(configContainer);
+		} else {
 			configContainer = document.createElement("div");
 			configContainer.id = "popup-config-container";
 			const style = document.createElement("style");
 			style.innerHTML = `
+.setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
 .setting-row::after {
     content: "";
     display: table;
@@ -831,13 +850,16 @@ function PopupLyrics() {
     align-items: center;
 }
 .setting-row .col.description {
-    float: left;
     padding-right: 15px;
     cursor: default;
+    width: 50%;
 }
 .setting-row .col.action {
-    float: right;
-    text-align: right;
+    justify-content: flex-end;
+    width: 50%;
+}
+.popup-config-col-margin {
+    margin-top: 10px;
 }
 button.switch {
     align-items: center;
@@ -858,6 +880,27 @@ button.switch.small {
     width: 22px;
     height: 22px;
     padding: 6px;
+}
+button.btn {
+    font-weight: 700;
+    display: block;
+    background-color: rgba(var(--spice-rgb-shadow), .7);
+    border-radius: 500px;
+    transition-duration: 33ms;
+    transition-property: background-color, border-color, color, box-shadow, filter, transform;
+    padding-inline: 15px;
+    border: 1px solid #727272;
+    color: var(--spice-text);
+    min-block-size: 32px;
+    cursor: pointer;
+}
+button.btn:hover {
+    transform: scale(1.04);
+    border-color: var(--spice-text);
+}
+button.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 #popup-config-container select {
     color: var(--spice-text);
@@ -945,6 +988,13 @@ button.switch.small {
 				userConfigs.delay = Number(state);
 				LocalStorage.set("popup-lyrics:delay", state);
 			});
+			const clearCache = descriptiveElement(
+				createButton("메모리 케시 비우기", "메모리 케시 비우기", () => {
+					CACHE = {};
+					updateTrack();
+				}),
+				"불러온 가사는 빠른 재로딩을 위하여 메모리에 캐싱하고 있습니다. Spotify를 다시 시작하지 않고도 메모리에서 캐시된 가사를 지우려면 이 버튼을 누르세요."
+			);
 
 			const serviceHeader = document.createElement("h2");
 			serviceHeader.innerText = "가사제공";
@@ -975,7 +1025,7 @@ button.switch.small {
 				const id = el.dataset.id;
 				userConfigs.services[id].on = state;
 				LocalStorage.set(`popup-lyrics:services:${id}:on`, state);
-				updateTrack();
+				updateTrack(true);
 			}
 
 			function posCallback(el, dir) {
@@ -990,23 +1040,28 @@ button.switch.small {
 				LocalStorage.set("popup-lyrics:services-order", JSON.stringify(userConfigs.servicesOrder));
 
 				stackServiceElements();
-				updateTrack();
-			}
-
-			function tokenChangeCallback(el, inputEl) {
-				const newVal = inputEl.value;
-				const id = el.dataset.id;
-				userConfigs.services[id].token = newVal;
-				LocalStorage.set(`popup-lyrics:services:${id}:token`, newVal);
-				updateTrack();
+				updateTrack(true);
 			}
 
 			for (const name of userConfigs.servicesOrder) {
-				userConfigs.services[name].element = createServiceOption(name, userConfigs.services[name], switchCallback, posCallback, tokenChangeCallback);
+				userConfigs.services[name].element = createServiceOption(name, userConfigs.services[name], switchCallback, posCallback);
 			}
 			stackServiceElements();
 
-			configContainer.append(style, optionHeader, smooth, center, cover, blurSize, fontSize, ratio, delay, serviceHeader, serviceContainer);
+			configContainer.append(
+				style,
+				optionHeader,
+				smooth,
+				center,
+				cover,
+				blurSize,
+				fontSize,
+				ratio,
+				delay,
+				clearCache,
+				serviceHeader,
+				serviceContainer
+			);
 		}
 		Spicetify.PopupModal.display({
 			title: "Popup Lyrics",
@@ -1084,8 +1139,125 @@ button.switch.small {
 
 		return container;
 	}
+	// if name is null, the element can be used without a description.
+	function createButton(name, defaultValue, callback) {
+		let container;
 
-	function createServiceOption(id, defaultVal, switchCallback, posCallback, tokenCallback) {
+		if (name) {
+			container = document.createElement("div");
+			container.innerHTML = `
+		<div class="setting-row">
+		<label class="col description">${name}</label>
+		<div class="col action">
+			<button id="popup-lyrics-clickbutton" class="btn">${defaultValue}</button>
+		</div>
+		</div>`;
+
+			const button = container.querySelector("#popup-lyrics-clickbutton");
+			button.onclick = () => {
+				callback();
+			};
+		} else {
+			container = document.createElement("button");
+			container.innerHTML = defaultValue;
+			container.className = "btn ";
+
+			container.onclick = () => {
+				callback();
+			};
+		}
+
+		return container;
+	}
+	// if name is null, the element can be used without a description.
+	function createTextfield(name, defaultValue, placeholder, callback) {
+		let container;
+
+		if (name) {
+			container = document.createElement("div");
+			container.className = "setting-column";
+			container.innerHTML = `
+			<label class="row-description">${name}</label>
+			<div class="popup-row-option action">
+				<input id="popup-lyrics-textfield" placeholder="${placeholder}" value="${defaultValue}" />
+			</div>`;
+
+			const textfield = container.querySelector("#popup-lyrics-textfield");
+			textfield.onchange = () => {
+				callback();
+			};
+		} else {
+			container = document.createElement("input");
+			container.placeholder = placeholder;
+			container.value = defaultValue;
+
+			container.onchange = (e) => {
+				callback(e.target.value);
+			};
+		}
+
+		return container;
+	}
+	function descriptiveElement(element, description) {
+		const desc = document.createElement("span");
+		desc.innerHTML = description;
+		element.append(desc);
+		return element;
+	}
+
+	function resetTokenButton(container) {
+		const button = container.querySelector("#popup-lyrics-refresh-token");
+		if (button) {
+			button.innerHTML = "토큰 초기화";
+			button.disabled = false;
+		}
+	}
+
+	function musixmatchTokenElements(defaultVal, id) {
+		const button = createButton(null, "토큰 초기화", clickRefresh);
+		button.className += "popup-config-col-margin";
+		button.id = "popup-lyrics-refresh-token";
+		const textfield = createTextfield(null, defaultVal.token, `Place your ${id} token here`, changeTokenfield);
+		textfield.className += "popup-config-col-margin";
+
+		function clickRefresh() {
+			button.innerHTML = "초기화중...";
+			button.disabled = true;
+
+			Spicetify.CosmosAsync.get("https://apic-desktop.musixmatch.com/ws/1.1/token.get?app_id=web-desktop-app-v1.0", null, {
+				authority: "apic-desktop.musixmatch.com",
+			})
+				.then(({ message: response }) => {
+					if (response.header.status_code === 200 && response.body.user_token) {
+						button.innerHTML = "토큰이 초기화 됨";
+						textfield.value = response.body.user_token;
+						textfield.dispatchEvent(new Event("change"));
+					} else if (response.header.status_code === 401) {
+						button.innerHTML = "너무 많은 요청";
+					} else {
+						button.innerHTML = "토큰 초기화 실패";
+						console.error("토큰 초기화 실패", response);
+					}
+				})
+				.catch((error) => {
+					button.innerHTML = "토큰 초기화 실패";
+					console.error("토큰 초기화 실패", error);
+				});
+		}
+
+		function changeTokenfield(value) {
+			userConfigs.services.musixmatch.token = value;
+			LocalStorage.set("popup-lyrics:services:musixmatch:token", value);
+			updateTrack(true);
+		}
+
+		const container = document.createElement("div");
+		container.append(button);
+		container.append(textfield);
+		return container;
+	}
+
+	function createServiceOption(id, defaultVal, switchCallback, posCallback) {
 		const name = id.replace(/^./, (c) => c.toUpperCase());
 
 		const container = document.createElement("div");
@@ -1113,12 +1285,8 @@ button.switch.small {
 </div>
 <span>${defaultVal.desc}</span>`;
 
-		if (defaultVal.token !== undefined) {
-			const input = document.createElement("input");
-			input.placeholder = `Place your ${id} token here`;
-			input.value = defaultVal.token;
-			input.onchange = () => tokenCallback(container, input);
-			container.append(input);
+		if (id === "musixmatch") {
+			container.append(musixmatchTokenElements(defaultVal));
 		}
 
 		const [up, down, slider] = container.querySelectorAll("button");

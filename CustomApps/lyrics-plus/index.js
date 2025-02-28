@@ -58,9 +58,14 @@ const CONFIG = {
 		delay: 0,
 	},
 	providers: {
+		lrclib: {
+			on: getConfig("lyrics-plus:provider:lrclib:on"),
+			desc: "LRCLIB는 오픈소스 가사 제공 서비스 입니다. 실시간 가사, 일반가사 모두 지원합니다..",
+			modes: [SYNCED, UNSYNCED],
+		},
 		musixmatch: {
 			on: getConfig("lyrics-plus:provider:musixmatch:on"),
-			desc: "Spotify와 완벽하게 호환이 됩니다. 가사를 원활하게 불러오지 못할 경우 <code>토큰 초기화</code> 버튼을 눌러주세요.",
+			desc: "Spotify와 완벽하게 호환이 됩니다. 가사를 원활하게 불러오지 못할 경우 <code>토큰 초기화</code> 버튼을 눌러주세요. 경우에 따라 자체 CORS 프록시를 사용해야 할 수도 있습니다.",
 			token: localStorage.getItem("lyrics-plus:provider:musixmatch:token") || "21051986b9886beabe1ce01c3ce94c96319411f8f2c122676365e3",
 			modes: [KARAOKE, SYNCED, UNSYNCED],
 		},
@@ -70,14 +75,9 @@ const CONFIG = {
 			modes: [SYNCED, UNSYNCED],
 		},
 		netease: {
-			on: getConfig("lyrics-plus:provider:netease:on"),
+			on: getConfig("lyrics-plus:provider:netease:on", false),
 			desc: "중국에서 운영하는 실시간 가사 서비스입니다. (정확도 떨어짐)",
 			modes: [KARAOKE, SYNCED, UNSYNCED],
-		},
-		lrclib: {
-			on: getConfig("lyrics-plus:provider:lrclib:on"),
-			desc: "LRCLIB는 오픈소스 가사 제공 서비스 입니다. 실시간 가사, 일반가사 모두 지원합니다.",
-			modes: [SYNCED, UNSYNCED],
 		},
 		genius: {
 			on: spotifyVersion >= "1.2.31" ? false : getConfig("lyrics-plus:provider:genius:on"),
@@ -175,9 +175,10 @@ class LyricsContainer extends react.Component {
 		this.styleVariables = {};
 		this.fullscreenContainer = document.createElement("div");
 		this.fullscreenContainer.id = "lyrics-fullscreen-container";
-		this.mousetrap = new Spicetify.Mousetrap();
+		this.mousetrap = null;
 		this.containerRef = react.createRef(null);
 		this.translator = null;
+		this.initMoustrap();
 		// Cache last state
 		this.languageOverride = CONFIG.visual["translate:detect-language-override"];
 		this.translate = CONFIG.visual.translate;
@@ -646,6 +647,11 @@ class LyricsContainer extends react.Component {
 
 		reader.readAsText(file[0]);
 		event.target.value = "";
+	}
+	initMoustrap() {
+		if (!this.mousetrap && Spicetify.Mousetrap) {
+			this.mousetrap = new Spicetify.Mousetrap();
+		}
 	}
 
 	componentDidMount() {
