@@ -65,7 +65,7 @@ const CONFIG = {
 		},
 		musixmatch: {
 			on: getConfig("lyrics-plus:provider:musixmatch:on"),
-			desc: "Spotify와 완벽하게 호환이 됩니다. 가사를 원활하게 불러오지 못할 경우 <code>토큰 초기화</code> 버튼을 눌러주세요. 경우에 따라 자체 CORS 프록시를 변경해야 할 수도 있습니다.",
+			desc: "Spotify와 완벽하게 호환이 됩니다. 가사를 원활하게 불러오지 못할 경우 <code>토큰 초기화</code> 버튼을 눌러주세요. 경우에 따라 자체 CORS 프록시로 변경해야 할 수도 있습니다.",
 			token: localStorage.getItem("lyrics-plus:provider:musixmatch:token") || "21051986b9886beabe1ce01c3ce94c96319411f8f2c122676365e3",
 			modes: [KARAOKE, SYNCED, UNSYNCED],
 		},
