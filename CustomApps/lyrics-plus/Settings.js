@@ -490,7 +490,7 @@ const corsProxyTemplate = () => {
 	const [proxyValue, setProxyValue] = react.useState(localStorage.getItem("spicetify:corsProxyTemplate") || "https://cors-proxy.spicetify.app/{url}");
 
 	return react.createElement("input", {
-		placeholder: "CORS Proxy Template",
+		placeholder: "CORS 프록시 설정",
 		value: proxyValue,
 		onChange: (event) => {
 			const value = event.target.value;
@@ -737,7 +737,7 @@ function openConfig() {
 				reloadLyrics?.();
 			},
 		}),
-		react.createElement("h2", null, "CORS Proxy Template"),
+		react.createElement("h2", null, "CORS 프록시 설정"),
 		react.createElement("span", {
 			dangerouslySetInnerHTML: {
 				__html:
