@@ -306,6 +306,13 @@ func colorVariableReplace(content string) string {
 			},
 		},
 		{
+			Name:  "CSS: --spice-main-elevated",
+			Regex: "#(242424|1f1f1f)",
+			Replacement: func(submatches ...string) string {
+				return "var(--spice-main-elevated)"
+			},
+		},
+		{
 			Name:  "CSS: --spice-main",
 			Regex: "#121212",
 			Replacement: func(submatches ...string) string {
@@ -349,7 +356,7 @@ func colorVariableReplace(content string) string {
 		},
 		{
 			Name:  "CSS: --spice-subtext",
-			Regex: `#(b3b3b3|a7a7a7)`,
+			Regex: "#(b3b3b3|a7a7a7)",
 			Replacement: func(submatches ...string) string {
 				return "var(--spice-subtext)"
 			},
@@ -791,7 +798,7 @@ func removeRTL(input string) string {
 
 func exposeAPIs_main(input string, report patchReporter) string {
 	inputContextMenu := utils.FindFirstMatch(input, `.*value:"contextmenu"`)
-	if len(inputContextMenu) > 1 {
+	if len(inputContextMenu) > 0 {
 		croppedInput := inputContextMenu[0]
 		react := utils.FindLastMatch(croppedInput, `([a-zA-Z_\$][\w\$]*)\.useRef`)[1]
 		candicates := utils.FindLastMatch(croppedInput, `\(\{[^}]*menu:([a-zA-Z_\$][\w\$]*),[^}]*trigger:([a-zA-Z_\$][\w\$]*),[^}]*triggerRef:([a-zA-Z_\$][\w\$]*)`)
