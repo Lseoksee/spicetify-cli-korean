@@ -569,13 +569,19 @@ applyScrollingFix();
 	};
 	const reactComponentsUI = exposeReactComponentsUI({ modules, functionModules, exportedForwardRefs });
 
-	const knownMenuTypes = ["album", "show", "artist", "track"];
+	const knownMenuTypes = ["album", "show", "artist", "track", "playlist"];
 	const menus = modules
-		.map((m) => m?.type?.toString().match(/value:"[\w-]+"/g) && [m, ...m.type.toString().match(/value:"[\w-]+"/g)])
+		.map((m) => {
+			const valueMatch = m?.type?.toString().match(/value:"([\w-]+)"/);
+			if (valueMatch) return [m, valueMatch[1]];
+			const typeMatch = m?.type?.toString().match(/type:[\w$]+\.[\w$]+\.([A-Z_]+)/);
+			if (typeMatch) return [m, typeMatch[1].toLowerCase()];
+			return null;
+		})
 		.filter(Boolean)
 		.filter((m) => m[1] !== 'value:"row"')
 		.map(([module, type]) => {
-			type = type.match(/value:"([\w-]+)"/)[1];
+			type = type.match(/value:"([\w-]+)"/)?.[1] ?? type;
 
 			if (!knownMenuTypes.includes(type)) return;
 			if (type === "show") type = "podcast-show";
@@ -682,7 +688,7 @@ applyScrollingFix();
 			},
 			Router: functionModules.find((m) => m.toString().includes("navigationType") && m.toString().includes("static")),
 			Routes: functionModules.find((m) => m.toString().match(/\([\w$]+\)\{let\{children:[\w$]+,location:[\w$]+\}=[\w$]+/)),
-			Route: functionModules.find((m) => m.toString().match(/^function [\w$]+\([\w$]+\)\{\(0,[\w$]+\.[\w$]+\)\(\!1\)\}$/)),
+			Route: functionModules.find((m) => m.toString().match(/^function [\w$]+\([\w$]+\)\{\(0,[\w$]+\.[\w$]+\)\(!1\)\}$/)),
 			StoreProvider: functionModules.find((m) => m.toString().includes("notifyNestedSubs") && m.toString().includes("serverState")),
 			ScrollableContainer: functionModules.find((m) => m.toString().includes("scrollLeft") && m.toString().includes("showButtons")),
 			IconComponent: reactComponentsUI.Icon,
@@ -732,6 +738,7 @@ applyScrollingFix();
 		const listOfComponents = [
 			"ScrollableContainer",
 			"Slider",
+			"Dropdown",
 			"Toggle",
 			"Cards.Artist",
 			"Cards.Audiobook",
@@ -781,6 +788,18 @@ applyScrollingFix();
 			(m) => m.toString().includes("scrollLeft") && m.toString().includes("showButtons")
 		);
 		Object.assign(Spicetify.ReactComponent.Cards, Object.fromEntries(cards));
+
+		// chunks
+		const dropdownChunk = chunks.find(([, value]) => value.toString().includes("dropDown") && value.toString().includes("isSafari"));
+		if (dropdownChunk) {
+			Spicetify.ReactComponent.Dropdown =
+				Object.values(require(dropdownChunk[0]))?.[0]?.render ?? Object.values(require(dropdownChunk[0])).find((m) => typeof m === "function");
+		}
+
+		const toggleChunk = chunks.find(([, value]) => value.toString().includes("onSelected") && value.toString().includes('type:"checkbox"'));
+		if (toggleChunk && !Spicetify.ReactComponent.Toggle) {
+			Spicetify.ReactComponent.Toggle = Object.values(require(toggleChunk[0]))[0].render;
+		}
 
 		if (!listOfComponents.every((component) => Spicetify.ReactComponent[component] !== undefined)) {
 			setTimeout(waitForChunks, 100);
@@ -882,15 +901,10 @@ applyScrollingFix();
 	const playlistMenuChunk = chunks.find(
 		([, value]) => value.toString().includes('value:"playlist"') && value.toString().includes("canView") && value.toString().includes("permissions")
 	);
-	if (playlistMenuChunk) {
+	if (playlistMenuChunk && !Spicetify.ReactComponent?.PlaylistMenu) {
 		Spicetify.ReactComponent.PlaylistMenu = Object.values(require(playlistMenuChunk[0])).find(
 			(m) => typeof m === "function" || typeof m === "object"
 		);
-	}
-
-	const dropdownChunk = chunks.find(([, value]) => value.toString().includes("dropDown") && value.toString().includes("isSafari"));
-	if (dropdownChunk) {
-		Spicetify.ReactComponent.Dropdown = Object.values(require(dropdownChunk[0])).find((m) => typeof m === "function");
 	}
 
 	const infiniteQueryChunk = chunks.find(
@@ -932,7 +946,7 @@ applyScrollingFix();
 			setTimeout(bindColorExtractor, 10);
 			return;
 		}
-		let imageAnalysis = functionModules.find((m) => m.toString().match(/\![\w$]+\.isFallback|\{extractColor/g));
+		let imageAnalysis = functionModules.find((m) => m.toString().match(/![\w$]+\.isFallback|\{extractColor/g));
 		const fallbackPreset = modules.find((m) => m?.colorDark);
 
 		// Search chunk in Spotify 1.2.13 or much older because it is impossible to find any distinguishing features
@@ -1731,7 +1745,9 @@ Spicetify.ContextMenuV2 = (() => {
 	}
 
 	class ItemSubMenu {
-		static itemsToComponents = (items) => items.map((item) => item._element);
+		static itemsToComponents = (items, props, trigger, target) => {
+			return items.filter((item) => (item.shouldAdd || (() => true))?.(props, trigger, target)).map((item) => item._element);
+		};
 
 		constructor({ text, disabled = false, leadingIcon, divider, items, shouldAdd = () => true }) {
 			this.shouldAdd = shouldAdd;
@@ -1739,6 +1755,7 @@ Spicetify.ContextMenuV2 = (() => {
 			this._text = text;
 			this._disabled = disabled;
 			this._leadingIcon = leadingIcon;
+			this._divider = divider;
 			this._items = items;
 			this._element = Spicetify.ReactJSX.jsx(() => {
 				const [_text, setText] = Spicetify.React.useState(this._text);
@@ -1762,6 +1779,9 @@ Spicetify.ContextMenuV2 = (() => {
 					};
 				});
 
+				const context = Spicetify.React.useContext(Spicetify.ContextMenuV2._context) ?? {};
+				const { props, trigger, target } = context;
+
 				return Spicetify.React.createElement(Spicetify.ReactComponent.MenuSubMenuItem, {
 					displayText: _text,
 					divider: _divider,
@@ -1771,7 +1791,7 @@ Spicetify.ContextMenuV2 = (() => {
 					onClick: () => undefined,
 					disabled: _disabled,
 					leadingIcon: _leadingIcon && createIconComponent(_leadingIcon),
-					children: ItemSubMenu.itemsToComponents(_items),
+					children: ItemSubMenu.itemsToComponents(_items, props, trigger, target),
 				});
 			}, {});
 		}

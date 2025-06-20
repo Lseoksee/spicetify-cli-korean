@@ -145,7 +145,7 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 					embeddedString, _, _, err := utils.ReadStringFromUTF16Binary(binFilePath, startMarker, endMarker)
 					if err != nil {
 						utils.PrintWarning(fmt.Sprintf("Could not process %s: %v", binFilePath, err))
-						utils.PrintInfo("If above warning says 'could not find start marker', you can safely ignore that error. It's for the future spotify release that might add xpui to the snapshot.")
+						utils.PrintInfo("If above warning says 'could not find start marker', you can safely ignore that error if you're on Spotify 1.2.63 or lower. However, if you're on 1.2.64 or higher, please report this issue")
 						continue
 					}
 
@@ -215,7 +215,12 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 						content = exposeAPIs_vendor(content, printPatch)
 					}
 
-					content = exposeGraphQL(content, printPatch)
+					if spotifyMajor >= 1 && spotifyMinor >= 2 && (spotifyPatch >= 28 && spotifyPatch <= 57) {
+						utils.ReplaceOnce(&content, `(typeName\])`, func(submatches ...string) string {
+							return fmt.Sprintf(`%s || []`, submatches[1])
+						})
+					}
+					content = additionalPatches(content, printPatch)
 				}
 				printPatch("CSS (JS): Patching our mappings into file")
 				for k, v := range cssTranslationMap {
@@ -239,7 +244,7 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 					printPatch("Remove RTL")
 					content = removeRTL(content)
 				}
-				if fileName == "xpui.css" {
+				if fileName == "xpui.css" || fileName == "xpui-snapshot.css" {
 					printPatch("Extra CSS Patch")
 					content = content + `
 					.main-gridContainer-fixedWidth{grid-template-columns: repeat(auto-fill, var(--column-width));width: calc((var(--column-count) - 1) * var(--grid-gap)) + var(--column-count) * var(--column-width));}.main-cardImage-imageWrapper{background-color: var(--card-color, #333);border-radius: 6px;-webkit-box-shadow: 0 8px 24px rgba(0, 0, 0, .5);box-shadow: 0 8px 24px rgba(0, 0, 0, .5);padding-bottom: 100%;position: relative;width:100%;}.main-cardImage-image,.main-card-imagePlaceholder{height: 100%;left: 0;position: absolute;top: 0;width: 100%};.main-content-view{height:100%;}
@@ -278,7 +283,7 @@ func StartCSS(extractedAppsPath string) {
 	appPath := filepath.Join(extractedAppsPath, "xpui")
 	filepath.Walk(appPath, func(path string, info os.FileInfo, err error) error {
 		// temp so text won't be black ._.
-		if info.Name() == "pip-mini-player.css" {
+		if strings.HasPrefix(info.Name(), "pip-mini-player") && strings.HasSuffix(info.Name(), ".css") {
 			return nil
 		}
 
@@ -798,7 +803,7 @@ func removeRTL(input string) string {
 	return applyPatches(input, rtlPatches)
 }
 
-func exposeGraphQL(input string, report logPatch) string {
+func additionalPatches(input string, report logPatch) string {
 	graphQLPatches := []Patch{
 		{
 			Name:  "GraphQL definitions (<=1.2.30)",
@@ -820,7 +825,7 @@ func exposeGraphQL(input string, report logPatch) string {
 }
 
 func exposeAPIs_main(input string, report logPatch) string {
-	inputContextMenu := utils.FindFirstMatch(input, `.*value:"contextmenu"`)
+	inputContextMenu := utils.FindFirstMatch(input, `.*(?:value:"contextmenu"|"[^"]*":"context-menu")`)
 	if len(inputContextMenu) > 0 {
 		croppedInput := inputContextMenu[0]
 		react := utils.FindLastMatch(croppedInput, `([a-zA-Z_\$][\w\$]*)\.useRef`)[1]
@@ -841,7 +846,7 @@ func exposeAPIs_main(input string, report logPatch) string {
 			target = "e.triggerRef"
 		}
 
-		utils.Replace(&input, `\(0,([\w_$]+)\.jsx\)\([\w_$]+\.[\w_$]+,\{value:"contextmenu"[^\}]+\}\)\}\)`, func(submatches ...string) string {
+		utils.Replace(&input, `\(0,([\w_$]+)\.jsx\)\((?:[\w_$]+\.[\w_$]+,\{value:"contextmenu"[^}]+\}\)\}\)|"[\w-]+",\{[^}]+:"context-menu"[^}]+\}\))`, func(submatches ...string) string {
 			return fmt.Sprintf("(0,%s.jsx)((Spicetify.ContextMenuV2._context||(Spicetify.ContextMenuV2._context=%s.createContext(null))).Provider,{value:{props:%s?.props,trigger:%s,target:%s},children:%s})", submatches[1], react, menu, trigger, target, submatches[0])
 		})
 	}

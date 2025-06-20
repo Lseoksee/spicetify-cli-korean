@@ -27,3 +27,7 @@ Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
 - [설치](https://spicetify.app/docs/getting-started)
 - [사용법](https://spicetify.app/docs/getting-started#basic-usage)
 - [FAQ](https://spicetify.app/docs/faq)
+
+### Code Signing Policy
+
+Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org/).
