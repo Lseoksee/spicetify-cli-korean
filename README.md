@@ -1,10 +1,9 @@
 <h3 align="center"><a href="https://spicetify.app/"><img src="https://i.imgur.com/iwcLITQ.png" width="600px"></a></h3>
 <p align="center">
-  <a href="https://goreportcard.com/report/github.com/spicetify/spicetify-cli"><img src="https://goreportcard.com/badge/github.com/spicetify/spicetify-cli"></a>
-  <a href="https://github.com/Lseoksee/spicetify-cli-korean/releases/latest"><img src="https://img.shields.io/github/v/release/Lseoksee/spicetify-cli-korean.svg?colorB=97CA00%3Flabel%3Dversion&include_prereleases"></a>
-  <a href="https://github.com/Lseoksee/spicetify-cli-korean/releases"><img src="https://img.shields.io/github/downloads/spicetify/spicetify-cli/total.svg?colorB=97CA00"></a>
+  <a href="https://goreportcard.com/report/github.com/spicetify/cli"><img src="https://goreportcard.com/badge/github.com/spicetify/cli"></a>
+  <a href="https://github.com/Lseoksee/spicetify-cli-korean/releases/latest"><img src="https://img.shields.io/github/release/Lseoksee/spicetify-cli-korean/all.svg?colorB=97CA00&label=latest%20version"></a>
+  <a href="https://github.com/Lseoksee/spicetify-cli-korean/releases"><img src="https://img.shields.io/github/downloads/Lseoksee/spicetify-cli-korean/total.svg?colorB=97CA00&label=total%20downloads"></a>
   <a href="https://discord.gg/VnevqPp2Rr"><img src="https://img.shields.io/discord/842219447716151306?label=chat&logo=discord&logoColor=discord"></a>
-  <a href="https://www.reddit.com/r/spicetify"><img src="https://img.shields.io/reddit/subreddit-subscribers/spicetify?logo=reddit"></a>
 </p>
 
 ---
@@ -18,16 +17,17 @@ Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
 
 - 색상과 UI변경
 - 고급 사용자정의 CSS 지원
-- 확장프로그램 (Javascript script)을 이용하여 기능을 확장하고 제어
-- 맞춤 앱 지원
-- 성능 향상을 위한 불필요한 요소 제거
+- 기능 확장, UI 조작 및 플레이어 제어를 위한 확장 기능 제공
+- 사용 앱 추가 기능 제공
+- 나만의 Spotify 클라이언트 제작 가능
 
 ### 링크
 
 - [설치](https://spicetify.app/docs/getting-started)
 - [사용법](https://spicetify.app/docs/getting-started#basic-usage)
-- [FAQ](https://spicetify.app/docs/faq)
 
-### Code Signing Policy
+---
 
-Free code signing provided by [SignPath.io](https://signpath.io), certificate by [SignPath Foundation](https://signpath.org/).
+### 코드 서명 정책
+
+무료 코드 서명 제공 [SignPath.io](https://signpath.io), 인증서 [SignPath Foundation](https://signpath.org/).
