@@ -693,8 +693,8 @@ const GeniusPage = react.memo(
 						event.preventDefault();
 						const copylyrics = lyrics.replace(/<br>/g, "\n").replace(/<[^>]*>/g, "");
 						Spicetify.Platform.ClipboardAPI.copy(copylyrics)
-							.then(() => Spicetify.showNotification("Lyrics copied to clipboard"))
-							.catch(() => Spicetify.showNotification("Failed to copy lyrics to clipboard"));
+							.then(() => Spicetify.showNotification("가사를 복사했습니다"))
+							.catch(() => Spicetify.showNotification("가사 복사 오류"));
 					},
 				})
 			);

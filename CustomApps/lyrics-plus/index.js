@@ -23,8 +23,8 @@ function getConfig(name, defaultVal = true) {
 const APP_NAME = "lyrics-plus";
 const MUSIXMATCH_TRANSLATION_PREFIX_DEFAULT = "musixmatchTranslation:";
 const MUSIXMATCH_TRANSLATION_PREFIX_GLOBAL_KEY = "__lyricsPlusMusixmatchTranslationPrefix";
-const MUSIXMATCH_TRANSLATION_FETCH_MESSAGE = "Fetching translation...";
-const MUSIXMATCH_TRANSLATION_FETCH_FAILED_MESSAGE = "Failed to fetch translation, please try again in a few minutes";
+const MUSIXMATCH_TRANSLATION_FETCH_MESSAGE = "번역을 불러오는 중...";
+const MUSIXMATCH_TRANSLATION_FETCH_FAILED_MESSAGE = "번역을 불러오지 못했습니다. 몇 분 후 다시 시도해주세요.";
 const MUSIXMATCH_TRANSLATION_PREFIX =
 	typeof window !== "undefined" && typeof window[MUSIXMATCH_TRANSLATION_PREFIX_GLOBAL_KEY] === "string"
 		? window[MUSIXMATCH_TRANSLATION_PREFIX_GLOBAL_KEY]
