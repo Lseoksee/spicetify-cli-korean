@@ -547,17 +547,6 @@ const OptionList = ({ type, items, onChange }) => {
 	});
 };
 
-const languageCodes =
-	"none,en,af,ar,bg,bn,ca,zh,cs,da,de,el,es,et,fa,fi,fr,gu,he,hi,hr,hu,id,is,it,ja,jv,kn,ko,lt,lv,ml,mr,ms,nl,no,pl,pt,ro,ru,sk,sl,sr,su,sv,ta,te,th,tr,uk,ur,vi,zu".split(
-		","
-	);
-
-const displayNames = new Intl.DisplayNames(["ko"], { type: "language" });
-const languageOptions = languageCodes.reduce((acc, code) => {
-	acc[code] = code === "none" ? "None" : displayNames.of(code);
-	return acc;
-}, {});
-
 function openConfig() {
 	const configContainer = react.createElement(
 		"div",
@@ -676,13 +665,6 @@ function openConfig() {
 					step: thresholdSizeLimit.step,
 				},
 				{
-					desc: "Musixmatch 번역",
-					info: "가사가 Musixmatch 제공자로 로드된 경우, 원하는 언어로 번역해 보세요. 언어를 선택하면 가사가 새로고침됩니다.",
-					key: "musixmatch-translation-language",
-					type: ConfigSelection,
-					options: languageOptions,
-				},
-				{
 					desc: "메모리 케시 비우기",
 					info: "불러온 가사는 빠른 재로딩을 위하여 메모리에 캐싱하고 있습니다. Spotify를 다시 시작하지 않고도 메모리에서 캐시된 가사를 지우려면 이 버튼을 누르세요.",
 					key: "clear-memore-cache",
@@ -696,17 +678,7 @@ function openConfig() {
 			onChange: (name, value) => {
 				CONFIG.visual[name] = value;
 				localStorage.setItem(`${APP_NAME}:visual:${name}`, value);
-
-				// Reload Lyrics if translation language is changed
-				if (name === "musixmatch-translation-language") {
-					if (value === "none") {
-						CONFIG.visual["translate:translated-lyrics-source"] = "none";
-						localStorage.setItem(`${APP_NAME}:visual:translate:translated-lyrics-source`, "none");
-					}
-					reloadLyrics?.();
-				} else {
-					lyricContainerUpdate?.();
-				}
+				lyricContainerUpdate?.();
 
 				const configChange = new CustomEvent("lyrics-plus", {
 					detail: {

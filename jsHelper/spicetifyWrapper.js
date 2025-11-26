@@ -326,21 +326,21 @@ window.Spicetify = {
 		setTimeout(addMissingPlatformAPIs, 50);
 		return;
 	}
-	const version = Spicetify.Platform.version.split(".").map((i) => Number.parseInt(i));
+	const version = Spicetify.Platform.version.split(".").map((i) => Number.parseInt(i, 10));
 	if (version[0] === 1 && version[1] === 2 && version[2] < 38) return;
 
 	for (const [key, _] of Spicetify.Platform.Registry._map.entries()) {
 		if (typeof key?.description !== "string" || !key?.description.endsWith("API")) continue;
 		const symbolName = key.description;
 		if (Object.hasOwn(Spicetify.Platform, symbolName)) continue;
-		const resolvedAPI = Spicetify.Platform.Registry.resolve(key);
-		if (!resolvedAPI) {
-			console.warn(`[spicetifyWrapper] Failed to resolve PlatformAPI from Registry: ${symbolName}`);
-			continue;
-		}
+		try {
+			const resolvedAPI = Spicetify.Platform.Registry.resolve(key);
+			Spicetify.Platform[symbolName] = resolvedAPI;
 
-		Spicetify.Platform[symbolName] = resolvedAPI;
-		console.debug(`[spicetifyWrapper] Resolved PlatformAPI from Registry: ${symbolName}`);
+			console.debug(`[spicetifyWrapper] Resolved PlatformAPI from Registry: ${symbolName}`);
+		} catch (err) {
+			console.error(`[spicetifyWrapper] Error resolving PlatformAPI from Registry: ${symbolName}`, err);
+		}
 	}
 })();
 
@@ -352,7 +352,7 @@ function applyScrollingFix() {
 	}
 
 	// Run only for 1.2.56 and lower
-	const version = Spicetify.Platform.version.split(".").map((i) => Number.parseInt(i));
+	const version = Spicetify.Platform.version.split(".").map((i) => Number.parseInt(i, 10));
 	if (version[1] >= 2 && version[2] >= 57) return;
 
 	const scrollableElements = Array.from(document.querySelectorAll("*")).filter((el) => {
@@ -648,9 +648,6 @@ applyScrollingFix();
 		ReactComponent: {
 			...Spicetify.ReactComponent,
 			TextComponent: modules.find((m) => m?.h1 && m?.render),
-			ConfirmDialog: functionModules.find(
-				(m) => m.toString().includes("isOpen") && m.toString().includes("shouldCloseOnEsc") && m.toString().includes("onClose")
-			),
 			Menu: functionModules.find((m) => m.toString().includes("getInitialFocusElement") && m.toString().includes("children")),
 			MenuItem: functionModules.find((m) => m.toString().includes("handleMouseEnter") && m.toString().includes("onClick")),
 			MenuSubMenuItem: functionModules.find((f) => f.toString().includes("subMenuIcon")),
@@ -887,13 +884,19 @@ applyScrollingFix();
 	});
 
 	const confirmDialogChunk = chunks.find(
-		([, value]) => value.toString().includes("confirmDialog") && value.toString().includes("shouldCloseOnEsc") && value.toString().includes("isOpen")
+		([, value]) =>
+			value.toString().includes("main-confirmDialog-container") ||
+			(value.toString().includes("confirmDialog") && value.toString().includes("shouldCloseOnEsc") && value.toString().includes("isOpen"))
 	);
 	if (!Spicetify.ReactComponent?.ConfirmDialog && confirmDialogChunk) {
 		Spicetify.ReactComponent.ConfirmDialog = Object.values(require(confirmDialogChunk[0])).find((m) => typeof m === "object");
+	} else {
+		Spicetify.ReactComponent.ConfirmDialog = functionModules.find(
+			(m) => m.toString().includes("isOpen") && m.toString().includes("shouldCloseOnEsc") && m.toString().includes("onClose")
+		);
 	}
 
-	const contextMenuChunk = chunks.find(([, value]) => value.toString().includes("toggleContextMenu"));
+	const contextMenuChunk = chunks.find(([, value]) => value.toString().includes("handleContextMenu"));
 	if (contextMenuChunk) {
 		Spicetify.ReactComponent.ContextMenu = Object.values(require(contextMenuChunk[0])).find((m) => typeof m === "function");
 	}
@@ -997,7 +1000,7 @@ applyScrollingFix();
 				// Avoid creating 2 arrays of the same values
 				try {
 					const values = Object.values(m);
-					return values.some((m) => typeof m === "function") && values.some((m) => m?.AD);
+					return values.some((m) => typeof m === "function") && values.some((m) => m?.PLAYLIST_V2);
 				} catch {
 					return false;
 				}
@@ -1005,7 +1008,7 @@ applyScrollingFix();
 		const URIModules = Object.values(URIChunk);
 
 		// URI.Type
-		Spicetify.URI.Type = URIModules.find((m) => m?.AD);
+		Spicetify.URI.Type = URIModules.find((m) => m?.PLAYLIST_V2);
 
 		// Parse functions
 		Spicetify.URI.from = URIModules.find((m) => typeof m === "function" && m.toString().includes("allowedTypes"));
@@ -1368,7 +1371,7 @@ Spicetify._getStyledClassName = (args, component) => {
 		"[": "[",
 		"\\": "\\",
 		"]": "]",
-		// biome-ignore lint/suspicious/noDuplicateObjectKeys: <explanation>
+		// biome-ignore lint/suspicious/noDuplicateObjectKeys: Not an issue
 		'"': '"',
 		"~": "`",
 		"!": "1",
@@ -1745,11 +1748,16 @@ Spicetify.ContextMenuV2 = (() => {
 	}
 
 	class ItemSubMenu {
-		static itemsToComponents = (items, props, trigger, target) => {
-			return items.filter((item) => (item.shouldAdd || (() => true))?.(props, trigger, target)).map((item) => item._element);
-		};
+		static itemsToComponents(items, props, trigger, target, parentDepth = 1) {
+			return items
+				.filter((item) => (item.shouldAdd || (() => true))?.(props, trigger, target))
+				.map((item) => {
+					if (item instanceof ItemSubMenu) item.depth = parentDepth + 1;
+					return item._element;
+				});
+		}
 
-		constructor({ text, disabled = false, leadingIcon, divider, items, shouldAdd = () => true }) {
+		constructor({ text, disabled = false, leadingIcon, divider, items, depth = 1, shouldAdd = () => true }) {
 			this.shouldAdd = shouldAdd;
 
 			this._text = text;
@@ -1757,12 +1765,14 @@ Spicetify.ContextMenuV2 = (() => {
 			this._leadingIcon = leadingIcon;
 			this._divider = divider;
 			this._items = items;
+			this._depth = depth;
 			this._element = Spicetify.ReactJSX.jsx(() => {
 				const [_text, setText] = Spicetify.React.useState(this._text);
 				const [_disabled, setDisabled] = Spicetify.React.useState(this._disabled);
 				const [_leadingIcon, setLeadingIcon] = Spicetify.React.useState(this._leadingIcon);
 				const [_divider, setDivider] = Spicetify.React.useState(this._divider);
 				const [_items, setItems] = Spicetify.React.useState(this._items);
+				const [_depth, setDepth] = Spicetify.React.useState(this._depth);
 
 				Spicetify.React.useEffect(() => {
 					this._setText = setText;
@@ -1770,12 +1780,14 @@ Spicetify.ContextMenuV2 = (() => {
 					this._setLeadingIcon = setLeadingIcon;
 					this._setDivider = setDivider;
 					this._setItems = setItems;
+					this._setDepth = setDepth;
 					return () => {
 						this._setText = undefined;
 						this._setDisabled = undefined;
 						this._setLeadingIcon = undefined;
 						this._setDivider = undefined;
 						this._setItems = undefined;
+						this._setDepth = undefined;
 					};
 				});
 
@@ -1785,13 +1797,13 @@ Spicetify.ContextMenuV2 = (() => {
 				return Spicetify.React.createElement(Spicetify.ReactComponent.MenuSubMenuItem, {
 					displayText: _text,
 					divider: _divider,
-					depth: 1,
+					depth: _depth,
 					placement: "right-start",
 					onOpenChange: () => undefined,
 					onClick: () => undefined,
 					disabled: _disabled,
 					leadingIcon: _leadingIcon && createIconComponent(_leadingIcon),
-					children: ItemSubMenu.itemsToComponents(_items, props, trigger, target),
+					children: ItemSubMenu.itemsToComponents(_items, props, trigger, target, _depth),
 				});
 			}, {});
 		}
@@ -1826,6 +1838,14 @@ Spicetify.ContextMenuV2 = (() => {
 		}
 		get divider() {
 			return this._divider;
+		}
+
+		set depth(value) {
+			this._depth = value;
+			this._setDepth?.(this._depth);
+		}
+		get depth() {
+			return this._depth;
 		}
 
 		addItem(item) {

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	spotifystatus "github.com/spicetify/cli/src/status/spotify"
@@ -13,6 +14,8 @@ import (
 var (
 	debuggerURL    string
 	autoReloadFunc func()
+	watchQueue     chan func()
+	watchQueueOnce sync.Once
 )
 
 // Watch .
@@ -54,9 +57,13 @@ func Watch(liveUpdate bool) {
 					utils.Fatal(err)
 				}
 
-				refreshThemeJS()
-				utils.PrintSuccess(utils.PrependTime("Theme's JS was reloaded"))
-			}, autoReloadFunc)
+				enqueueWatchJob(func() {
+					refreshThemeJS()
+					if autoReloadFunc != nil {
+						autoReloadFunc()
+					}
+				})
+			}, nil)
 		}
 	}
 
@@ -69,9 +76,13 @@ func Watch(liveUpdate bool) {
 					utils.Fatal(err)
 				}
 
-				refreshThemeAssets()
-				utils.PrintSuccess(utils.PrependTime("Custom assets were reloaded"))
-			}, autoReloadFunc)
+				enqueueWatchJob(func() {
+					refreshThemeAssets()
+					if autoReloadFunc != nil {
+						autoReloadFunc()
+					}
+				})
+			}, nil)
 		}
 	}
 
@@ -80,10 +91,14 @@ func Watch(liveUpdate bool) {
 			utils.Fatal(err)
 		}
 
-		InitSetting()
-		refreshThemeCSS()
-		utils.PrintSuccess(utils.PrependTime("Custom CSS is updated"))
-	}, autoReloadFunc)
+		enqueueWatchJob(func() {
+			InitSetting()
+			refreshThemeCSS()
+			if autoReloadFunc != nil {
+				autoReloadFunc()
+			}
+		})
+	}, nil)
 }
 
 // WatchExtensions .
@@ -219,19 +234,32 @@ func isValidForWatching() bool {
 
 func startDebugger() {
 	if len(utils.GetDebuggerPath()) == 0 {
-		SetDevTools()
-		EvalSpotifyRestart(true, "--remote-debugging-port=9222", "--remote-allow-origins=*")
-		utils.PrintInfo("Spotify is restarted with debugger on. Waiting...")
+		EnableDevTools()
+		SpotifyRestart("--remote-debugging-port=9222", "--remote-allow-origins=*")
+		utils.PrintInfo("Restarted Spotify with debugger on. Waiting...")
 		for len(utils.GetDebuggerPath()) == 0 {
 			// Wait until debugger is up
 		}
 	}
 	autoReloadFunc = func() {
 		if utils.SendReload(&debuggerURL) != nil {
-			utils.PrintError("Could not Reload Spotify")
+			utils.PrintError("Could not reload Spotify")
 			utils.PrintInfo(`Close Spotify and run watch command again`)
+			os.Exit(1)
 		} else {
-			utils.PrintSuccess("Spotify reloaded")
+			utils.PrintSuccess("Reloaded Spotify")
 		}
 	}
+}
+
+func enqueueWatchJob(job func()) {
+	watchQueueOnce.Do(func() {
+		watchQueue = make(chan func(), 64)
+		go func() {
+			for fn := range watchQueue {
+				fn()
+			}
+		}()
+	})
+	watchQueue <- job
 }
