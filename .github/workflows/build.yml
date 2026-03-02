@@ -77,7 +77,7 @@ jobs:
           CGO_ENABLED: 0
 
       - name: Attest output
-        uses: actions/attest-build-provenance@v3
+        uses: actions/attest-build-provenance@v4
         if: env.IS_UNIX == 'true' || env.IS_WIN == 'true'
         with:
           subject-path: "./spicetify${{ matrix.os == 'windows' && '.exe' || '' }}"
@@ -117,7 +117,7 @@ jobs:
       - name: Update AUR package
         uses: fjogeleit/http-request-action@master
         with:
-          url: https://vps.itsmeow.dev/spicetify-update
+          url: https://spicetify-update.itsmeow.dev/spicetify-update
           method: GET
       - name: Update Winget package
         uses: vedantmgoyal9/winget-releaser@main
