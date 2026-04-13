@@ -104,6 +104,14 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 		readLocalCssMap(&cssTranslationMap)
 	}
 
+	cssMapPairs := make([]string, 0, len(cssTranslationMap)*4)
+	for k, v := range cssTranslationMap {
+		cssMapPairs = append(cssMapPairs, k+":", `"`+v+`":`)
+		cssMapPairs = append(cssMapPairs, k, v)
+	}
+	cssMapJSReplacer := strings.NewReplacer(cssMapPairs...)
+	cssMapBareKeySpaceRe := regexp.MustCompile(`\b[a-zA-Z0-9_]{16,21}[ \t]+:`)
+
 	verParts := strings.Split(flags.SpotifyVer, ".")
 	spotifyMajor, spotifyMinor, spotifyPatch := 0, 0, 0
 	if len(verParts) > 0 {
@@ -259,11 +267,19 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 					})
 				}
 
-				for k, v := range cssTranslationMap {
-					utils.Replace(&content, k, func(submatches ...string) string {
-						return v
-					})
-				}
+				// Bare keys with whitespace before the colon
+				// the replacer's k+":" entry can't match these, so handle them first
+				content = cssMapBareKeySpaceRe.ReplaceAllStringFunc(content, func(match string) string {
+					colonIdx := strings.LastIndex(match, ":")
+					key := strings.TrimRight(match[:colonIdx], " \t")
+					if v, ok := cssTranslationMap[key]; ok {
+						return `"` + v + `":`
+					}
+					return match
+				})
+				// Single pass: k+":" → "v": for bare keys,
+				// k -> v for all other occurrences
+				content = cssMapJSReplacer.Replace(content)
 				content = colorVariableReplaceForJS(content)
 
 				return content
@@ -280,7 +296,7 @@ func Start(version string, spotifyBasePath string, extractedAppsPath string, fla
 				}
 				if fileName == "xpui.css" || fileName == "xpui-snapshot.css" {
 					content = content + `
-					.main-gridContainer-fixedWidth{grid-template-columns: repeat(auto-fill, var(--column-width));width: calc((var(--column-count) - 1) * var(--grid-gap)) + var(--column-count) * var(--column-width));}.main-cardImage-imageWrapper{background-color: var(--card-color, #333);border-radius: 6px;-webkit-box-shadow: 0 8px 24px rgba(0, 0, 0, .5);box-shadow: 0 8px 24px rgba(0, 0, 0, .5);padding-bottom: 100%;position: relative;width:100%;}.main-cardImage-image,.main-card-imagePlaceholder{height: 100%;left: 0;position: absolute;top: 0;width: 100%};.main-content-view{height:100%;}
+.main-gridContainer-fixedWidth{grid-template-columns:repeat(auto-fill,var(--column-width));width:calc((var(--column-count) - 1) * var(--grid-gap)) + var(--column-count) * var(--column-width) )}.main-cardImage-imageWrapper{background-color:var(--card-color,#333);border-radius:6px;-webkit-box-shadow:0 8px 24px rgba(0,0,0,.5);box-shadow:0 8px 24px rgba(0,0,0,.5);padding-bottom:100%;position:relative;width:100%}.main-card-imagePlaceholder,.main-cardImage-image{height:100%;left:0;position:absolute;top:0;width:100%}.main-card-card{border-radius:8px;-webkit-box-flex:1;background:var(--spice-player);-ms-flex:1;flex:1;isolation:isolate;padding:16px;position:relative;-webkit-transition:background-color .3s;transition:background-color .3s;width:100%}.main-card-card:hover,.main-card-card[data-context-menu-open=true]{background:var(--spice-card)}.main-card-card:focus-within{background:var(--spice-card)}.main-card-card .main-card-cardLink{position:absolute;z-index:0}.RjYPjR7FsVf42b3a5Efm:before,.Z78JmW4GUvvxLXSFjb7R:not(:last-child):after{content:"â€¢";margin:0 4px}.main-card-card a,.main-card-card button{position:relative;z-index:1}.main-card-cardLink{bottom:0;content:"";cursor:pointer;left:0;overflow:hidden;right:0;text-indent:100%;top:0;white-space:nowrap;z-index:0}.main-card-cardTitle{z-index:1}.main-card-cardTitleLink:focus,.main-card-cardTitleLink:hover{text-decoration:none}.Wmr5qZ5jui6X37XCrChA{opacity:0}.main-card-newEpisodeIndicator{margin-top:3px}.main-card-imageContainer{pointer-events:none;position:relative}.main-card-imageContainerOld,.main-card-imageContainerSkeleton{margin-bottom:16px}.main-card-cardMetadata{min-height:62px;-webkit-line-clamp:2}.main-card-DownloadStatusIndicator{bottom:12px;inset-inline-end:12px;position:absolute}.main-card-PlayButtonContainer{border-radius:500px;bottom:8px;-webkit-box-shadow:0 8px 8px rgba(var(--spice-rgb-shadow),.3);box-shadow:0 8px 8px rgba(var(--spice-rgb-shadow),.3);inset-inline-end:8px;opacity:0;pointer-events:none;position:absolute;-webkit-transform:translateY(8px);transform:translateY(8px);z-index:2}@media(pointer:coarse){.main-card-PlayButtonContainer{display:none}}@media(prefers-reduced-motion:no-preference){.main-card-PlayButtonContainer{-webkit-transition:opacity .2s ease-out,-webkit-transform .2s ease-out;transition:transform .2s ease-out,opacity .2s ease-out,-webkit-transform .2s ease-out}}.main-card-PlayButtonContainerVisible{opacity:1;pointer-events:auto;position:absolute;-webkit-transform:translateY(0);transform:translateY(0)}.main-card-cardContainer{--animation-speed:0.2s!important;white-space:normal}.main-card-card:hover .main-card-PlayButtonContainer,.main-card-cardContainer:hover .main-card-PlayButtonContainer{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}.main-card-card:focus-within .main-card-PlayButtonContainer,.main-card-cardContainer:focus-within{opacity:1;-webkit-transform:translateY(0);transform:translateY(0)}@media(pointer:fine){.main-card-card .main-card-cardLink:hover{cursor:pointer}.main-card-card:hover .main-card-PlayButtonContainer,.main-card-cardContainer:hover .main-card-PlayButtonContainer{opacity:1;pointer-events:auto;position:absolute}.main-card-card:focus-within .main-card-PlayButtonContainer,.main-card-cardContainer:focus-within .main-card-PlayButtonContainer{opacity:1;pointer-events:auto;position:absolute}}.main-card-cardMetadata,.v3isO2phyJAoZRkmme0G{display:-webkit-box;-webkit-box-orient:vertical}
 					`
 				}
 				return content
@@ -1090,7 +1106,7 @@ func splitVersion(version string) ([3]int, error) {
 	if len(vSplit) != 3 {
 		return [3]int{}, errors.New("invalid version string")
 	}
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		conv, err := strconv.Atoi(vSplit[i])
 		if err != nil {
 			return [3]int{}, err

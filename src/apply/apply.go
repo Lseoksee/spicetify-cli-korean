@@ -68,6 +68,33 @@ func AdditionalOptions(appsFolderPath string, flags Flag) {
 		filesToModified[filepath.Join(appsFolderPath, "xpui", "vendor~xpui.js")] = []func(string, Flag){insertExpFeatures}
 	}
 
+	if flags.SidebarConfig {
+		if err := utils.CopyFile(
+			filepath.Join(utils.GetJsHelperDir(), "sidebarConfig.js"),
+			filepath.Join(appsFolderPath, "xpui", "helper")); err != nil {
+			utils.PrintError(err.Error())
+			flags.SidebarConfig = false
+		}
+	}
+
+	if flags.HomeConfig {
+		if err := utils.CopyFile(
+			filepath.Join(utils.GetJsHelperDir(), "homeConfig.js"),
+			filepath.Join(appsFolderPath, "xpui", "helper")); err != nil {
+			utils.PrintError(err.Error())
+			flags.HomeConfig = false
+		}
+	}
+
+	if flags.ExpFeatures {
+		if err := utils.CopyFile(
+			filepath.Join(utils.GetJsHelperDir(), "expFeatures.js"),
+			filepath.Join(appsFolderPath, "xpui", "helper")); err != nil {
+			utils.PrintError(err.Error())
+			flags.ExpFeatures = false
+		}
+	}
+
 	for file, calls := range filesToModified {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
 			continue
@@ -76,24 +103,6 @@ func AdditionalOptions(appsFolderPath string, flags Flag) {
 		for _, call := range calls {
 			call(file, flags)
 		}
-	}
-
-	if flags.SidebarConfig {
-		utils.CopyFile(
-			filepath.Join(utils.GetJsHelperDir(), "sidebarConfig.js"),
-			filepath.Join(appsFolderPath, "xpui", "helper"))
-	}
-
-	if flags.HomeConfig {
-		utils.CopyFile(
-			filepath.Join(utils.GetJsHelperDir(), "homeConfig.js"),
-			filepath.Join(appsFolderPath, "xpui", "helper"))
-	}
-
-	if flags.ExpFeatures {
-		utils.CopyFile(
-			filepath.Join(utils.GetJsHelperDir(), "expFeatures.js"),
-			filepath.Join(appsFolderPath, "xpui", "helper"))
 	}
 }
 
@@ -263,11 +272,12 @@ func insertCustomApp(jsPath string, flags Flag) {
 		// React lazy loading patterns for dynamic imports
 		reactPatterns := []string{
 			// Sync pattern: X.lazy((() => Y.Z(123).then(W.bind(W, 456))))
-			`([\w_\$][\w_\$\d]*(?:\(\))?)\.lazy\(\((?:\(\)=>|function\(\)\{return )(\w+)\.(\w+)\(\d+\)\.then\(\w+\.bind\(\w+,\d+\)\)\}?\)\)`,
+			`([\w_\$][\w_\$\d]*(?:\(\))?)\.lazy\(\((?:\(\)=>|function\(\)\{return )(\w+)\.(\w+)\(["']?[\w-]+["']?\)\.then\(\w+\.bind\(\w+,["']?[\w-]+["']?\)\)\}?\)\)`,
 			// Async pattern (1.2.78+): m.lazy(async()=>{...await o.e(123).then(...)})
-			`([\w_\$][\w_\$\d]*)\.lazy\(async\(\)=>\{(?:[^{}]|\{[^{}]*\})*await\s+(\w+)\.(\w+)\(\d+\)\.then\(\w+\.bind\(\w+,\d+\)\)`,
-			// Async Promise.all pattern (1.2.78+): m.lazy(async()=>await Promise.all([...]).then(...))
-			`([\w_\$][\w_\$\d]*(?:\(\))?)\.lazy\(async\(\)=>await\s+Promise\.all\(\[[^\]]+\]\)\.then\((\w+)\.bind\((\w+),\d+\)\)`,
+			`([\w_\$][\w_\$\d]*)\.lazy\(async\(\)=>\{(?:[^{}]|\{[^{}]*\})*await\s+(\w+)\.(\w+)\(["']?[\w-]+["']?\)\.then\(\w+\.bind\(\w+,["']?[\w-]+["']?\)\)`,
+			// Async Promise.all pattern (1.2.78+): m.lazy(async()=>await Promise.all([Y.Z(123),...]).then(...))
+			// Capture the chunk loader from the first entry inside Promise.all, not from .bind()
+			`([\w_\$][\w_\$\d]*(?:\(\))?)\.lazy\(async\(\)=>await\s+Promise\.all\(\[(\w+)\.(\w+)\(["']?[\w-]+["']?\)`,
 		}
 
 		// React element/route patterns for path matching
@@ -390,7 +400,7 @@ func insertNavLink(str string, appNameArray string) string {
 			// Global Navbar >= 1.2.60, greedy matching with enclosing brackets
 			`("global-nav-bar".*[[\w\$&|]*\(0,[a-zA-Z_\$][\w\$]*\.jsx\)\(\s*\w+,\s*\{\s*className:\w*\s*\}\s*\))\]`,
 			// Global Navbar >= 1.2.46, lazy matching
-			`("global-nav-bar".*?)(\(0,\s*[a-zA-Z_\$][\w\$]*\.jsx\))(\(\s*\w+,\s*\{\s*className:\w*\s*\}\s*\))`,
+			`("global-nav-bar".*?)(\(0,\s*[a-zA-Z_\$][\w\$]*\.jsx\))(\(\s*\w+,\s*\{\s*className:\s*(?:\w*|".*?")\s*\}\s*\))`,
 		},
 		func(index int, submatches ...string) string {
 			switch index {
