@@ -1,0 +1,1 @@
+pnpm run build:wrapper && spicetify.exe restore && spicetify.exe clear && spicetify.exe backup apply
