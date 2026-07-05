@@ -51,7 +51,7 @@ pnpm i
 > [Oxfmt 사용](https://oxc.rs/docs/guide/usage/formatter.html)
 
 ```bash
-pnpm run lint && pnpm run fmt
+pnpm run lint; pnpm run fmt
 ```
 
 ### wrapper 관련
