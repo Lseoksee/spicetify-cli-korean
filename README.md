@@ -66,4 +66,6 @@ pnpm run lint; pnpm run fmt
 pnpm run build:wrapper
 ```
 
+개발 디버깅 할때는 `빠른설치.bat`말고 `build_run.bat`을 사용하자
+
 </details>
