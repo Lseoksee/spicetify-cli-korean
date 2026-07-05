@@ -31,3 +31,16 @@ Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
 ### 코드 서명 정책
 
 무료 코드 서명 제공 [SignPath.io](https://signpath.io), 인증서 [SignPath Foundation](https://signpath.org/).
+
+## 개발 가이드
+
+<details>
+  <summary>펼치기</summary>
+
+### 커밋 올리기전 코드 포멧
+
+```bash
+pnpm run lint && pnpm run fmt
+```
+
+</details>
