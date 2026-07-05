@@ -19,7 +19,22 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate wrapper build
+        run: pnpm check:wrapper
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -47,13 +62,30 @@ jobs:
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v2')
     needs: build
+    env:
+      SIGNPATH_ENABLED: ${{ secrets.SIGNPATH_API_TOKEN != '' && secrets.SIGNPATH_ORG_ID != '' }}
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get Tag
         run: echo "TAG=${GITHUB_REF#refs/*/v}" >> $GITHUB_ENV
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build wrapper bundle
+        run: pnpm build:wrapper
 
       - name: Is Unix Platform
         run: echo "IS_UNIX=${{ matrix.os != 'windows' && matrix.arch != '386' && (matrix.os != 'linux' || matrix.arch != 'arm64') }}" >> $GITHUB_ENV
