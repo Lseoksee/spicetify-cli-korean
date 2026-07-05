@@ -37,10 +37,33 @@ Spotify앱을 사용자 커스텀하는 명령줄 도구입니다.
 <details>
   <summary>펼치기</summary>
 
+### 프로젝트 셋팅
+
+```bash
+# pnpm 설치
+npm install -g pnpm
+# pnpm 패키지 설치
+pnpm i
+```
+
 ### 커밋 올리기전 코드 포멧
+
+> [Oxfmt 사용](https://oxc.rs/docs/guide/usage/formatter.html)
 
 ```bash
 pnpm run lint && pnpm run fmt
+```
+
+### wrapper 관련
+
+- spicetify를 apply 할때 `spicetifyWrapper.js`가 없으면 플레이어 로드시 `spicetifyWrapper.js` 가 없다고 오류가 뜸
+- `src/jsHelper/spicetifyWrapper` 쪽 파일들이 수정되면
+  `spicetifyWrapper.js` 를 빌드 해줘야함
+
+따라서 apply 하거나 wrapper파일 수정되면 `spicetifyWrapper.js` 빌드해야함
+
+```bash
+pnpm run build:wrapper
 ```
 
 </details>
