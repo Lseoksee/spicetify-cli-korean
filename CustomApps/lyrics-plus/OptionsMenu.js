@@ -142,6 +142,8 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation, musixmat
 			none: "None",
 		};
 
+		let romanizationOptions = {};
+
 		const musixmatchDisplay = new Intl.DisplayNames(["ko"], { type: "language" });
 		const availableMusixmatchLanguages = Array.isArray(musixmatchLanguages) ? [...new Set(musixmatchLanguages.filter(Boolean))] : [];
 		const activeMusixmatchLanguage = musixmatchSelectedLanguage && musixmatchSelectedLanguage !== "none" ? musixmatchSelectedLanguage : null;
@@ -205,6 +207,10 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation, musixmat
 					hk: "중국어 (홍콩)",
 					tw: "중국어 (대만)",
 				};
+				romanizationOptions = {
+					none: "없음",
+					pinyin: "병음",
+				};
 				break;
 			}
 		}
@@ -241,6 +247,15 @@ const TranslationMenu = react.memo(({ friendlyLanguage, hasTranslation, musixmat
 				renderInline: true,
 				// for songs in languages that support translation but not Convert (e.g., English), the option is disabled.
 				when: () => friendlyLanguage,
+			},
+			{
+				desc: "로마자 표기",
+				key: "romanization",
+				type: ConfigSelection,
+				options: romanizationOptions,
+				renderInline: true,
+				// only Chinese has a romanization option (Pinyin) for now.
+				when: () => friendlyLanguage === "chinese",
 			},
 			{
 				desc: "변환 하기",
@@ -374,6 +389,14 @@ const AdjustmentsMenu = react.memo(({ mode, hasPerformer }) => {
 								{
 									desc: "폰트 크기",
 									key: "font-size",
+									type: ConfigAdjust,
+									min: fontSizeLimit.min,
+									max: fontSizeLimit.max,
+									step: fontSizeLimit.step,
+								},
+								{
+									desc: "로마자 표기 폰트 크기",
+									key: "romanization-font-size",
 									type: ConfigAdjust,
 									min: fontSizeLimit.min,
 									max: fontSizeLimit.max,
